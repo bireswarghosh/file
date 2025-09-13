@@ -4,6 +4,7 @@ import { Icon } from '@iconify/react';
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiosInstance";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -11,6 +12,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
 
   const handleSubmit = async (e) => {
@@ -24,18 +26,17 @@ const Login = () => {
         password
       });
       
-      // If the API returns a token in the response body, use it
-      if (response.data && response.data.token) {
-        localStorage.setItem("token", response.data.token);
+      if (response.data && response.data.message === "Login successful") {
+        // Generate a simple token since API doesn't return one
+        const token = btoa(`${username}:${Date.now()}`);
+        const userId = response.data.userId;
+        
+        // Use AuthContext login method
+        login(token, userId);
+        
+        // Navigate to home page
+        navigate("/");
       }
-      
-      // Store userId if available
-      if (response.data && response.data.userId) {
-        localStorage.setItem("userId", response.data.userId);
-      }
-      
-      // Login successful - navigate to home page
-      navigate("/");
       setLoading(false);
     } catch (err) {
       setError(

@@ -1,6 +1,8 @@
 
 
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import HomePageOne from "./pages/HomePageOne";
 import HomePageTwo from "./pages/HomePageTwo";
 import HomePageThree from "./pages/HomePageThree";
@@ -266,16 +268,11 @@ import BloodTestMaster from "./masterLayout/Bireswar_pages/IVF/BloodTestMaster.j
 
 
 function App() {
-
-
-
-  
-
-
   return (
-    <BrowserRouter>
-      <RouteScrollToTop />
-      <Routes>
+    <AuthProvider>
+      <BrowserRouter>
+        <RouteScrollToTop />
+        <Routes>
       {/* <Route exact path='/ReportButton' element={<ReportButton />} /> */}
         <Route exact path='/pdf_download' element={<AcPDFDownload />} />
         <Route exact path='/bill-register-pdf' element={<BillRegisterPdf />} />
@@ -291,7 +288,7 @@ function App() {
 
 
         
-        <Route exact path='/' element={<HomePageOne />} />
+        <Route exact path='/' element={<ProtectedRoute><HomePageOne /></ProtectedRoute>} />
 
         <Route exact path='*' element={<ErrorPage />} />
 
@@ -320,9 +317,9 @@ function App() {
 
 
 
-<Route exact path='/visit_entry' element={<OutdoorVisitDetail />} />
+<Route exact path='/visit_entry' element={<ProtectedRoute><OutdoorVisitDetail /></ProtectedRoute>} />
 {/* <Route exact path='/visit_entry' element={<New />} /> */}
-<Route exact path='/table-data' element={<Visit_list />} />
+<Route exact path='/table-data' element={<ProtectedRoute><Visit_list /></ProtectedRoute>} />
 <Route exact path='/patient-search' element={<Visit_list />} />
 <Route exact path='/dr-rect-visit-detail' element={<DrRectVisitDetail />} />
 <Route exact path='/visit-detail/:id' element={<OutdoorVisitDetail />} />
@@ -692,8 +689,9 @@ function App() {
 
 
 
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
