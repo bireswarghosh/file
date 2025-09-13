@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Icon } from '@iconify/react';
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import ThemeToggleButton from "../helper/ThemeToggleButton";
 import BusinessIcon from '@mui/icons-material/Business';
 import AppointmentBookingMenu from "../components/AppointmentBookingMenu";
+import { useAuth } from "../contexts/AuthContext";
 
 // Add CSS for nested dropdowns
 const nestedDropdownStyles = `
@@ -42,6 +43,9 @@ const nestedDropdownStyles = `
 `;
 
 const MasterLayout = ({ children }) => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  
   // Add the nested dropdown styles to the document
   useEffect(() => {
     const styleElement = document.createElement('style');
@@ -55,6 +59,11 @@ const MasterLayout = ({ children }) => {
   let [sidebarActive, seSidebarActive] = useState(false);
   let [mobileMenu, setMobileMenu] = useState(false);
   const location = useLocation(); // Hook to get the current route
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   useEffect(() => {
     // Keep parent dropdowns open based on current route
@@ -2702,13 +2711,14 @@ const MasterLayout = ({ children }) => {
                         </Link>
                       </li>
                       <li>
-                        <Link
+                        <button
                           className='dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-danger d-flex align-items-center gap-3'
-                          to='#'
+                          onClick={handleLogout}
+                          style={{border: 'none', background: 'none', width: '100%', textAlign: 'left'}}
                         >
                           <Icon icon='lucide:power' className='icon text-xl' />{" "}
                           Log Out
-                        </Link>
+                        </button>
                       </li>
                     </ul>
                   </div>

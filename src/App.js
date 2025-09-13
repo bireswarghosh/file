@@ -320,22 +320,22 @@ function App() {
 <Route exact path='/visit_entry' element={<ProtectedRoute><OutdoorVisitDetail /></ProtectedRoute>} />
 {/* <Route exact path='/visit_entry' element={<New />} /> */}
 <Route exact path='/table-data' element={<ProtectedRoute><Visit_list /></ProtectedRoute>} />
-<Route exact path='/patient-search' element={<Visit_list />} />
-<Route exact path='/dr-rect-visit-detail' element={<DrRectVisitDetail />} />
-<Route exact path='/visit-detail/:id' element={<OutdoorVisitDetail />} />
-<Route exact path='/opd_query' element={<Opd_query />} />
+<Route exact path='/patient-search' element={<ProtectedRoute><Visit_list /></ProtectedRoute>} />
+<Route exact path='/dr-rect-visit-detail' element={<ProtectedRoute><DrRectVisitDetail /></ProtectedRoute>} />
+<Route exact path='/visit-detail/:id' element={<ProtectedRoute><OutdoorVisitDetail /></ProtectedRoute>} />
+<Route exact path='/opd_query' element={<ProtectedRoute><Opd_query /></ProtectedRoute>} />
 
 
 
 
-<Route exact path='/other_charges' element={<Other_chearges />} />
-<Route exact path='/emr' element={<Emr />} />
-<Route exact path='/doctor_from' element={<EDoctorForm />} />
+<Route exact path='/other_charges' element={<ProtectedRoute><Other_chearges /></ProtectedRoute>} />
+<Route exact path='/emr' element={<ProtectedRoute><Emr /></ProtectedRoute>} />
+<Route exact path='/doctor_from' element={<ProtectedRoute><EDoctorForm /></ProtectedRoute>} />
 
 
 
 {/* !! deperment */}
-<Route exact path='/department' element={<DepartmentSubdepartment />} />
+<Route exact path='/department' element={<ProtectedRoute><DepartmentSubdepartment /></ProtectedRoute>} />
 {/* !!!  DOCTOR */}
 {/* <Route exact path='/doctor' element={<DoctorManagement />} />
 <Route path="/doctor/list" element={<DoctorList />} />
@@ -347,9 +347,9 @@ function App() {
 
 
 
-<Route path="/doctor" element={<DoctorManagement />} />
-<Route path="/active-doctors" element={<ActiveDoctors />} />
-<Route path="/doctor-login" element={<DoctorLogin />} />
+<Route path="/doctor" element={<ProtectedRoute><DoctorManagement /></ProtectedRoute>} />
+<Route path="/active-doctors" element={<ProtectedRoute><ActiveDoctors /></ProtectedRoute>} />
+<Route path="/doctor-login" element={<ProtectedRoute><DoctorLogin /></ProtectedRoute>} />
 
 
 
@@ -361,26 +361,26 @@ function App() {
 
 
 // Money Receipt Routes
-<Route path="/sampleReceipts" element={<SampleReceipts />} />
-<Route path="/initialFormData" element={<InitialFormData />} />
-<Route path="/initialFormData/:id" element={<InitialFormData />} />
+<Route path="/sampleReceipts" element={<ProtectedRoute><SampleReceipts /></ProtectedRoute>} />
+<Route path="/initialFormData" element={<ProtectedRoute><InitialFormData /></ProtectedRoute>} />
+<Route path="/initialFormData/:id" element={<ProtectedRoute><InitialFormData /></ProtectedRoute>} />
 
-<Route path="/RefundMoneyReceiptForm" element={<RefundMoneyReceiptForm />} />
-<Route path="/UnifiedMedicalForm" element={<UnifiedMedicalForm />} />
-
-
+<Route path="/RefundMoneyReceiptForm" element={<ProtectedRoute><RefundMoneyReceiptForm /></ProtectedRoute>} />
+<Route path="/UnifiedMedicalForm" element={<ProtectedRoute><UnifiedMedicalForm /></ProtectedRoute>} />
 
 
 
-<Route path="/UnifiedMedicalWorkspace" element={<UnifiedMedicalWorkspace />} />
 
-<Route path="/UnifiedMedicalApp" element={<UnifiedMedicalApp />} />
 
-<Route path="/sampleBookings" element={<SampleBookings />} />
+<Route path="/UnifiedMedicalWorkspace" element={<ProtectedRoute><UnifiedMedicalWorkspace /></ProtectedRoute>} />
 
-<Route path="/sampleCollection" element={<SampleCollection />} />
-<Route path="/sampleDetails" element={<SampleDetails />} />
-<Route path="/pos" element={<Pos />} />
+<Route path="/UnifiedMedicalApp" element={<ProtectedRoute><UnifiedMedicalApp /></ProtectedRoute>} />
+
+<Route path="/sampleBookings" element={<ProtectedRoute><SampleBookings /></ProtectedRoute>} />
+
+<Route path="/sampleCollection" element={<ProtectedRoute><SampleCollection /></ProtectedRoute>} />
+<Route path="/sampleDetails" element={<ProtectedRoute><SampleDetails /></ProtectedRoute>} />
+<Route path="/pos" element={<ProtectedRoute><Pos /></ProtectedRoute>} />
 <Route path="/RadiologyRequisition" element={<RadiologyRequisition />} />
 <Route path="/RadiologyRequisitionDetail" element={<RadiologyRequisitionDetail />} />
 <Route path="/PatientRegistrationList" element={<PatientRegistrationList />} />
@@ -479,12 +479,12 @@ function App() {
 {/* !   MASTER   */}
 
 
-<Route path="/IndoorParameterSetup" element={<IndoorParameterSetup />} />
+<Route path="/IndoorParameterSetup" element={<ProtectedRoute><IndoorParameterSetup /></ProtectedRoute>} />
 
 {/* outdoor master */}
-<Route path="/OutdoorParameterSetup" element={<OutdoorParameterSetup />} />
-<Route path="/ServiceMaster" element={<ServiceMaster />} />
-<Route path="/OutdoorOtherChargeMaster" element={<OutdoorOtherChargeMaster />} />
+<Route path="/OutdoorParameterSetup" element={<ProtectedRoute><OutdoorParameterSetup /></ProtectedRoute>} />
+<Route path="/ServiceMaster" element={<ProtectedRoute><ServiceMaster /></ProtectedRoute>} />
+<Route path="/OutdoorOtherChargeMaster" element={<ProtectedRoute><OutdoorOtherChargeMaster /></ProtectedRoute>} />
 <Route path="/RoomNoMaster" element={<RoomNoMaster />} />
 <Route path="/VisitTypeGrpMaster" element={<VisitTypeGrpMaster />} />
 <Route path="/ChiefMaster" element={<ChiefMaster />} />
@@ -570,8 +570,8 @@ function App() {
 
 
 <Route path="/MedicinMaster" element={<MedicinMaster />} />
-<Route path="/GenericMedicineManagement" element={<GenericMedicineManagement />} />
-<Route path="/AcHeadGroupManagement" element={<AcHeadGroupManagement />} />
+<Route path="/GenericMedicineManagement" element={<ProtectedRoute><GenericMedicineManagement /></ProtectedRoute>} />
+<Route path="/AcHeadGroupManagement" element={<ProtectedRoute><AcHeadGroupManagement /></ProtectedRoute>} />
 
 
 
