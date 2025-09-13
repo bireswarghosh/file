@@ -1,0 +1,48 @@
+/* Dark Mode Modal Fix - Copy this CSS to any file with modal forms */
+
+/* Modal - Dark mode compatible */
+.custom-modal .modal-content {
+  background: var(--bs-body-bg, #fff) !important;
+  color: var(--bs-body-color, #000) !important;
+}
+
+.custom-modal .modal-body {
+  background: var(--bs-body-bg, #fff) !important;
+  color: var(--bs-body-color, #000) !important;
+}
+
+.custom-modal .modal-footer {
+  background: var(--bs-body-bg, #f8f9fa) !important;
+}
+
+/* Form inputs - Dark mode compatible */
+.custom-input {
+  background: var(--bs-body-bg, #fff) !important;
+  color: var(--bs-body-color, #000) !important;
+  border: 1px solid var(--bs-border-color, #e2e8f0) !important;
+}
+
+.custom-input:focus {
+  background: var(--bs-body-bg, #fff) !important;
+  color: var(--bs-body-color, #000) !important;
+}
+
+/* Form labels - Dark mode compatible */
+.custom-modal .form-label {
+  color: var(--bs-body-color, #000) !important;
+}
+
+/* 
+QUICK FIX FOR OTHER FILES:
+
+1. Replace in JSX:
+   className="bg-light" → className="custom-modal-body"
+   
+2. Add to Modal:
+   className="custom-modal"
+   
+3. Add to Form.Control:
+   className="custom-input"
+
+4. Copy this CSS to your <style jsx> section
+*/

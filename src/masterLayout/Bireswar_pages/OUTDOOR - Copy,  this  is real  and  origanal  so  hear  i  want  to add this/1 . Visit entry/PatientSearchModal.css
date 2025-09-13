@@ -1,0 +1,51 @@
+.patient-search-modal .modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-bottom: none;
+}
+
+.patient-search-modal .modal-title {
+  font-weight: 600;
+}
+
+.patient-search-modal .table {
+  margin-bottom: 0;
+}
+
+.patient-search-modal .table th {
+  background-color: #343a40;
+  color: white;
+  border: none;
+  font-weight: 500;
+  padding: 12px;
+}
+
+.patient-search-modal .table td {
+  padding: 12px;
+  vertical-align: middle;
+  border-color: #dee2e6;
+}
+
+.patient-search-modal .table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.patient-search-modal .btn-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+}
+
+.patient-search-modal .btn-success:hover {
+  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+  transform: translateY(-1px);
+}
+
+.patient-search-modal .badge {
+  font-size: 0.875rem;
+  padding: 8px 12px;
+}
+
+.patient-search-modal .text-muted {
+  font-size: 0.8rem;
+}

@@ -1,0 +1,110 @@
+.form-select, .form-control, textarea {
+   padding: 0 !important;
+}
+
+
+
+/* fro  left   side  panel */
+
+@media (min-width: 1200px) {
+    .sidebar {
+        inset-inline-start: 0;
+        width: 17.75rem;   
+    }
+}
+
+
+
+/* for   right   siddse */
+
+@media (min-width: 1200px) {
+    .dashboard-main {
+        margin-inline-start: 17.75rem;
+    }
+}
+
+
+
+
+
+
+/* !  select  fix   custom  dropdown  background  colour  issue   */
+
+    select option {
+  background-color: #ae96962e;
+}
+
+
+
+/* !   to  under  master  section  /  all  table  z  index   issue    */
+
+.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 1 !important;
+}
+
+
+
+
+/* !   FIXING OtherChargesMaster   EDIT  MODEL   */
+
+.form-switch .form-check-input:checked ~ .form-check-label {
+    color: #212529 !important;
+}
+
+
+
+
+
+/* !   for  fix  custom dark mode  issue  */
+
+/* GLOBAL DARK MODE FIX - Works for ALL modals automatically */
+
+/* All modals - Dark mode compatible */
+.modal-content {
+  background: var(--bs-body-bg, #fff) !important;
+  color: var(--bs-body-color, #000) !important;
+}
+
+.modal-body {
+  background: var(--bs-body-bg, #fff) !important;
+  color: var(--bs-body-color, #000) !important;
+}
+
+.modal-footer {
+  background: var(--bs-body-bg, #f8f9fa) !important;
+  color: var(--bs-body-color, #000) !important;
+}
+
+/* All form inputs in modals - Dark mode compatible */
+.modal .form-control, .modal .form-select {
+  background: var(--bs-body-bg, #fff) !important;
+  color: var(--bs-body-color, #000) !important;
+  border: 1px solid var(--bs-border-color, #dee2e6) !important;
+}
+
+.modal .form-control:focus, .modal .form-select:focus {
+  background: var(--bs-body-bg, #fff) !important;
+  color: var(--bs-body-color, #000) !important;
+}
+
+/* All form labels in modals - Dark mode compatible */
+.modal .form-label {
+  color: var(--bs-body-color, #000) !important;
+}
+
+/* 
+QUICK FIX FOR OTHER FILES:
+
+1. Replace in JSX:
+   className="bg-light" → className="custom-modal-body"
+   
+2. Add to Modal:
+   className="custom-modal"
+   
+3. Add to Form.Control:
+   className="custom-input"
+
+4. Copy this CSS to your <style jsx> section
+*/

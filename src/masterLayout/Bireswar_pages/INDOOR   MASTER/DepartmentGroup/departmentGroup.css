@@ -1,0 +1,73 @@
+/* Mobile optimizations */
+@media (max-width: 767px) {
+  .card-header {
+    padding: 0.75rem;
+  }
+  
+  .card-body {
+    padding: 0.75rem;
+  }
+  
+  /* Mobile card styles */
+  .mobile-card {
+    transition: all 0.2s ease;
+    border-radius: 0.5rem;
+  }
+  
+  .mobile-card:active {
+    transform: scale(0.98);
+  }
+  
+  /* Improve form inputs on mobile */
+  .form-control {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+  
+  /* Improve button touch targets */
+  .btn {
+    min-height: 44px;
+  }
+  
+  /* Fix modal on small screens */
+  .modal-content {
+    border-radius: 1rem;
+  }
+}
+
+/* Improve table responsiveness */
+.table-responsive {
+  scrollbar-width: thin;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+/* Improve button hover states */
+.btn-outline-primary:hover, 
+.btn-outline-danger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Improve modal animation */
+.modal.fade.show {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Improve form focus states */
+.form-control:focus {
+  box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+  border-color: #667eea;
+}
