@@ -1539,6 +1539,20 @@ const MasterLayout = ({ children }) => {
 
 
 
+    <li>
+              <NavLink
+                to='/razorpay-settings'
+                className={(navData) =>
+                  navData.isActive ? "active-page" : ""
+                }
+              >
+                <Icon icon='mdi:calendar-check' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+       razorpay-settings
+              </NavLink>
+
+            </li>
+
+
           </ul>
 
 

@@ -1,7 +1,20 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL:'https://lords-backend.onrender.com/api/v1',
+
+// ! for production
+
+//  baseURL:'https://lords-backend.onrender.com/api/v1',
+
+
+
+
+
+  // Automatically switch between production and local
+  baseURL: window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api/v1'  // for local machine
+    : 'https://lords-backend.onrender.com/api/v1',  // for production
+
   timeout: 30000, // Increased timeout to 30 seconds
   headers: {
     'Content-Type': 'application/json'

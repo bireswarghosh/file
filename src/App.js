@@ -265,6 +265,7 @@ import IVFBiodataForm from "./IVFBiodataForm.jsx";
 import IVFBiodataMaster from "./masterLayout/Bireswar_pages/IVF/IVFBiodataMaster.jsx";
 import BloodTestHeaderMaster from "./masterLayout/Bireswar_pages/IVF/BloodTestHeaderMaster.jsx";
 import BloodTestMaster from "./masterLayout/Bireswar_pages/IVF/BloodTestMaster.jsx";
+import RazorpaySettings from "./pages/RazorpaySettings.jsx";
 
 
 function App() {
@@ -665,6 +666,9 @@ function App() {
 <Route path="/video-call-demo" element={<VideoCallDemo />} />
 <Route path="/real-video-call/:roomId" element={<RealVideoCall />} />
 <Route path="/video-call-link-test" element={<VideoCallLinkTest />} />
+
+{/* Razorpay Settings Route */}
+<Route path="/razorpay-settings" element={<ProtectedRoute><RazorpaySettings /></ProtectedRoute>} />
 
 
 
