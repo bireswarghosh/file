@@ -1563,6 +1563,18 @@ const MasterLayout = ({ children }) => {
               </NavLink>
             </li>
 
+            <li>
+              <NavLink
+                to='/app-banner-settings'
+                className={(navData) =>
+                  navData.isActive ? "active-page" : ""
+                }
+              >
+                <Icon icon='mdi:image-multiple' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+       App Banner Management
+              </NavLink>
+            </li>
+
 
           </ul>
 
