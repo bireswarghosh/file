@@ -1546,10 +1546,21 @@ const MasterLayout = ({ children }) => {
                   navData.isActive ? "active-page" : ""
                 }
               >
-                <Icon icon='mdi:calendar-check' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-       razorpay-settings
+                <Icon icon='mdi:credit-card' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+       Razorpay Settings
               </NavLink>
+            </li>
 
+            <li>
+              <NavLink
+                to='/app-terms-settings'
+                className={(navData) =>
+                  navData.isActive ? "active-page" : ""
+                }
+              >
+                <Icon icon='mdi:file-document' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+       App Terms & Conditions
+              </NavLink>
             </li>
 
 
