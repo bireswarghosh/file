@@ -9,6 +9,7 @@ const AppBannerSettings = () => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingBanner, setEditingBanner] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -54,7 +55,7 @@ const AppBannerSettings = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.banner_image) {
+    if (!editingBanner && !formData.banner_image) {
       toast.error('Please select a banner image');
       return;
     }
@@ -66,24 +67,46 @@ const AppBannerSettings = () => {
       formDataToSend.append('description', formData.description);
       formDataToSend.append('is_active', formData.is_active);
       formDataToSend.append('sort_order', formData.sort_order);
-      formDataToSend.append('banner_image', formData.banner_image);
+      if (formData.banner_image) {
+        formDataToSend.append('banner_image', formData.banner_image);
+      }
 
-      const response = await axiosInstance.post('/app-banners', formDataToSend, {
+      const url = editingBanner ? `/app-banners/${editingBanner.id}` : '/app-banners';
+      const method = editingBanner ? 'put' : 'post';
+      
+      const response = await axiosInstance[method](url, formDataToSend, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
       if (response.data.success) {
-        toast.success('Banner uploaded successfully!');
-        setFormData({ title: '', description: '', is_active: 1, sort_order: 0, banner_image: null });
-        setShowAddForm(false);
+        toast.success(`Banner ${editingBanner ? 'updated' : 'uploaded'} successfully!`);
+        resetForm();
         fetchBanners();
       }
     } catch (error) {
-      console.error('Error uploading banner:', error);
-      toast.error('Failed to upload banner');
+      console.error('Error saving banner:', error);
+      toast.error('Failed to save banner');
     } finally {
       setUploading(false);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({ title: '', description: '', is_active: 1, sort_order: 0, banner_image: null });
+    setShowAddForm(false);
+    setEditingBanner(null);
+  };
+
+  const editBanner = (banner) => {
+    setFormData({
+      title: banner.title,
+      description: banner.description,
+      is_active: banner.is_active,
+      sort_order: banner.sort_order,
+      banner_image: null
+    });
+    setEditingBanner(banner);
+    setShowAddForm(true);
   };
 
   const deleteBanner = async (id) => {
@@ -120,7 +143,7 @@ const AppBannerSettings = () => {
         <div className="card-body">
           {showAddForm && (
             <div className="mb-4 p-3 border rounded">
-              <h6>Add New Banner</h6>
+              <h6>{editingBanner ? 'Edit Banner' : 'Add New Banner'}</h6>
               <form onSubmit={handleSubmit}>
                 <div className="row">
                   <div className="col-md-6">
@@ -171,7 +194,7 @@ const AppBannerSettings = () => {
                     className="form-control"
                     accept="image/*"
                     onChange={handleFileChange}
-                    required
+                    required={!editingBanner}
                   />
                   <small className="text-muted">Recommended size: 1200x400px, Max size: 5MB</small>
                 </div>
@@ -194,19 +217,19 @@ const AppBannerSettings = () => {
                     {uploading ? (
                       <>
                         <span className="spinner-border spinner-border-sm me-2"></span>
-                        Uploading...
+                        {editingBanner ? 'Updating...' : 'Uploading...'}
                       </>
                     ) : (
                       <>
-                        <i className="fas fa-upload me-1"></i>
-                        Upload Banner
+                        <i className={`fas ${editingBanner ? 'fa-save' : 'fa-upload'} me-1`}></i>
+                        {editingBanner ? 'Update Banner' : 'Upload Banner'}
                       </>
                     )}
                   </button>
                   <button 
                     type="button" 
                     className="btn btn-secondary"
-                    onClick={() => setShowAddForm(false)}
+                    onClick={resetForm}
                   >
                     Cancel
                   </button>
@@ -245,12 +268,20 @@ const AppBannerSettings = () => {
                               {banner.is_active ? 'Active' : 'Inactive'}
                             </span>
                           </small>
-                          <button 
-                            className="btn btn-danger btn-sm"
-                            onClick={() => deleteBanner(banner.id)}
-                          >
-                            <i className="fas fa-trash"></i>
-                          </button>
+                          <div className="btn-group">
+                            <button 
+                              className="btn btn-primary btn-sm"
+                              onClick={() => editBanner(banner)}
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button 
+                              className="btn btn-danger btn-sm"
+                              onClick={() => deleteBanner(banner.id)}
+                            >
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
