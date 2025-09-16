@@ -29,7 +29,8 @@ if (typeof document !== 'undefined') {
 const AppTermsSettings = () => {
   const [settings, setSettings] = useState({
     terms_content: '',
-    privacy_policy: ''
+    privacy_policy: '',
+    about_us: ''
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -45,7 +46,8 @@ const AppTermsSettings = () => {
       if (response.data.success && response.data.data) {
         setSettings({
           terms_content: response.data.data.terms_content || '',
-          privacy_policy: response.data.data.privacy_policy || ''
+          privacy_policy: response.data.data.privacy_policy || '',
+          about_us: response.data.data.about_us || ''
         });
       }
     } catch (error) {
@@ -93,9 +95,10 @@ const AppTermsSettings = () => {
     // Remove HTML tags for validation
     const termsText = settings.terms_content.replace(/<[^>]*>/g, '').trim();
     const policyText = settings.privacy_policy.replace(/<[^>]*>/g, '').trim();
+    const aboutText = settings.about_us.replace(/<[^>]*>/g, '').trim();
     
-    if (!termsText || !policyText) {
-      toast.error('Please fill in both Terms & Conditions and Privacy Policy');
+    if (!termsText || !policyText || !aboutText) {
+      toast.error('Please fill in Terms & Conditions, Privacy Policy, and About Us');
       return;
     }
 
@@ -169,13 +172,32 @@ const AppTermsSettings = () => {
                     </div>
                   </div>
                 </div>
+                
+                <div className="col-12">
+                  <div className="mb-4">
+                    <label className="form-label">
+                      About Us <span className="text-danger">*</span>
+                    </label>
+                    <div className="quill-container" style={{ marginBottom: '60px' }}>
+                      <ReactQuill
+                        theme="snow"
+                        value={settings.about_us}
+                        onChange={(content) => handleQuillChange(content, 'about_us')}
+                        modules={quillModules}
+                        formats={quillFormats}
+                        placeholder="Enter About Us content with formatting..."
+                        style={{ height: '200px' }}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
               
               <div className="row">
                 <div className="col-12">
                   <div className="alert alert-info">
                     <i className="fas fa-info-circle me-2"></i>
-                    <strong>Important:</strong> These terms and privacy policy will be displayed in your mobile app. 
+                    <strong>Important:</strong> These terms, privacy policy, and about us content will be displayed in your mobile app. 
                     Make sure the content is accurate and legally compliant.
                   </div>
                 </div>
