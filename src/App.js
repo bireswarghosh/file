@@ -268,6 +268,7 @@ import BloodTestMaster from "./masterLayout/Bireswar_pages/IVF/BloodTestMaster.j
 import RazorpaySettings from "./pages/RazorpaySettings.jsx";
 import AppTermsSettings from "./pages/AppTermsSettings.jsx";
 import AppBannerSettings from "./pages/AppBannerSettings.jsx";
+import AppSocialMediaSettings from "./pages/AppSocialMediaSettings.jsx";
 
 
 function App() {
@@ -677,6 +678,9 @@ function App() {
 
 {/* App Banner Management Route */}
 <Route path="/app-banner-settings" element={<ProtectedRoute><AppBannerSettings /></ProtectedRoute>} />
+
+{/* App Social Media Management Route */}
+<Route path="/app-social-media-settings" element={<ProtectedRoute><AppSocialMediaSettings /></ProtectedRoute>} />
 
 
 

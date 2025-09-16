@@ -1575,6 +1575,18 @@ const MasterLayout = ({ children }) => {
               </NavLink>
             </li>
 
+            <li>
+              <NavLink
+                to='/app-social-media-settings'
+                className={(navData) =>
+                  navData.isActive ? "active-page" : ""
+                }
+              >
+                <Icon icon='mdi:share-variant' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+       Social Media Management
+              </NavLink>
+            </li>
+
 
           </ul>
 
