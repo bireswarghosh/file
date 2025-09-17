@@ -269,6 +269,7 @@ import RazorpaySettings from "./pages/RazorpaySettings.jsx";
 import AppTermsSettings from "./pages/AppTermsSettings.jsx";
 import AppBannerSettings from "./pages/AppBannerSettings.jsx";
 import AppSocialMediaSettings from "./pages/AppSocialMediaSettings.jsx";
+import NotificationManagement from "./pages/NotificationManagement.jsx";
 
 
 function App() {
@@ -681,6 +682,9 @@ function App() {
 
 {/* App Social Media Management Route */}
 <Route path="/app-social-media-settings" element={<ProtectedRoute><AppSocialMediaSettings /></ProtectedRoute>} />
+
+{/* Notification Management Route */}
+<Route path="/notification-management" element={<ProtectedRoute><NotificationManagement /></ProtectedRoute>} />
 
 
 

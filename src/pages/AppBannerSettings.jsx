@@ -253,7 +253,7 @@ const AppBannerSettings = () => {
                   <div key={banner.id} className="col-md-6 col-lg-4 mb-4">
                     <div className="card">
                       <img 
-                        src={`http://localhost:5000${banner.image_url}`} 
+                        src={banner.image_url} 
                         className="card-img-top" 
                         alt={banner.title}
                         style={{ height: '200px', objectFit: 'cover' }}
