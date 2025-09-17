@@ -14,12 +14,71 @@ const NotificationManagement = () => {
     redirect_link: '',
     image_url: '',
     video_url: '',
-    target_type: 'all'
+    target_type: 'all',
+    target_ids: []
   });
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [userSearch, setUserSearch] = useState('');
+  const [userPage, setUserPage] = useState(1);
+  const [userPagination, setUserPagination] = useState({});
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
   useEffect(() => {
     fetchNotifications();
   }, []);
+
+  useEffect(() => {
+    if (formData.target_type === 'individual_patient') {
+      setPatients([]);
+      setUserPage(1);
+      fetchPatients(1, userSearch);
+    } else if (formData.target_type === 'individual_doctor') {
+      setDoctors([]);
+      setUserPage(1);
+      fetchDoctors(1, userSearch);
+    }
+  }, [formData.target_type, userSearch]);
+
+  const fetchPatients = async (page = 1, search = '') => {
+    setLoadingUsers(true);
+    try {
+      const response = await axiosInstance.get(`/patients?page=${page}&limit=50&search=${search}`);
+      if (response.data.success) {
+        if (page === 1) {
+          setPatients(response.data.data);
+        } else {
+          setPatients(prev => [...prev, ...response.data.data]);
+        }
+        setUserPagination(response.data.pagination);
+      }
+    } catch (error) {
+      console.error('Error fetching patients:', error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const fetchDoctors = async (page = 1, search = '') => {
+    setLoadingUsers(true);
+    try {
+      const response = await axiosInstance.get(`/doctormaster/active?search=${search}`);
+      if (response.data.success) {
+        const doctors = response.data.data.map(doc => ({
+          id: doc.DoctorId,
+          name: doc.Doctor,
+          specialization: doc.Qualification
+        }));
+        setDoctors(doctors);
+        setUserPagination({ page: 1, totalPages: 1, total: doctors.length });
+      }
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   const fetchNotifications = async () => {
     setLoading(true);
@@ -38,7 +97,11 @@ const NotificationManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axiosInstance.post('/notifications', formData);
+      const submitData = {
+        ...formData,
+        target_ids: (formData.target_type === 'individual_patient' || formData.target_type === 'individual_doctor') ? selectedUsers : null
+      };
+      const response = await axiosInstance.post('/notifications', submitData);
       if (response.data.success) {
         toast.success('Notification created successfully!');
         setShowModal(false);
@@ -48,12 +111,22 @@ const NotificationManagement = () => {
           redirect_link: '',
           image_url: '',
           video_url: '',
-          target_type: 'all'
+          target_type: 'all',
+          target_ids: []
         });
+        setSelectedUsers([]);
         fetchNotifications();
       }
     } catch (error) {
       toast.error('Failed to create notification');
+    }
+  };
+
+  const handleUserSelection = (userId, checked) => {
+    if (checked) {
+      setSelectedUsers([...selectedUsers, userId]);
+    } else {
+      setSelectedUsers(selectedUsers.filter(id => id !== userId));
     }
   };
 
@@ -177,13 +250,118 @@ const NotificationManagement = () => {
                       <select
                         className="form-control"
                         value={formData.target_type}
-                        onChange={(e) => setFormData({...formData, target_type: e.target.value})}
+                        onChange={(e) => {
+                          setFormData({...formData, target_type: e.target.value});
+                          setSelectedUsers([]);
+                          setUserSearch('');
+                          setUserPage(1);
+                        }}
                       >
                         <option value="all">All Users</option>
-                        <option value="patients">Patients Only</option>
-                        <option value="doctors">Doctors Only</option>
+                        <option value="patients">All Patients</option>
+                        <option value="doctors">All Doctors</option>
+                        <option value="individual_patient">Select Individual Patients</option>
+                        <option value="individual_doctor">Select Individual Doctors</option>
                       </select>
                     </div>
+                    
+                    {/* Individual User Selection */}
+                    {(formData.target_type === 'individual_patient' || formData.target_type === 'individual_doctor') && (
+                      <div className="col-12 mb-3">
+                        <label className="form-label">
+                          <i className={`fas ${formData.target_type === 'individual_patient' ? 'fa-user-injured' : 'fa-user-md'} me-2`}></i>
+                          Select {formData.target_type === 'individual_patient' ? 'Patients' : 'Doctors'}
+                          <span className="text-muted ms-2">(Only Active {formData.target_type === 'individual_doctor' ? 'Doctors' : 'Patients'})</span>
+                        </label>
+                        
+                        {/* Search Input */}
+                        <div className="mb-3">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder={`Search ${formData.target_type === 'individual_patient' ? 'patients' : 'doctors'}...`}
+                            value={userSearch}
+                            onChange={(e) => setUserSearch(e.target.value)}
+                          />
+                        </div>
+                        
+                        <div style={{maxHeight: '300px', overflowY: 'auto', border: '1px solid #ddd', padding: '15px', borderRadius: '8px', backgroundColor: '#f8f9fa'}}>
+                          {loadingUsers && userPage === 1 ? (
+                            <div className="text-center py-3">
+                              <div className="spinner-border spinner-border-sm" role="status"></div>
+                              <p className="mt-2">Loading...</p>
+                            </div>
+                          ) : (formData.target_type === 'individual_patient' ? patients : doctors).length === 0 ? (
+                            <div className="text-center text-muted py-3">
+                              <i className="fas fa-user-slash mb-2"></i>
+                              <p>No {formData.target_type === 'individual_patient' ? 'patients' : 'doctors'} found</p>
+                            </div>
+                          ) : (
+                            <>
+                              {(formData.target_type === 'individual_patient' ? patients : doctors).map(user => (
+                                <div key={user.id} className="form-check mb-2 p-2" style={{backgroundColor: 'white', borderRadius: '5px', border: '1px solid #e9ecef'}}>
+                                  <input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    id={`user-${user.id}`}
+                                    checked={selectedUsers.includes(user.id)}
+                                    onChange={(e) => handleUserSelection(user.id, e.target.checked)}
+                                  />
+                                  <label className="form-check-label w-100" htmlFor={`user-${user.id}`} style={{cursor: 'pointer'}}>
+                                    <div className="d-flex justify-content-between align-items-center">
+                                      <div>
+                                        <strong>{user.name || 'N/A'}</strong>
+                                        {user.phone && <div className="text-muted small">📞 {user.phone}</div>}
+                                        {user.specialization && <div className="text-info small">🩺 {user.specialization}</div>}
+                                      </div>
+                                      <span className="badge bg-light text-dark">ID: {user.id}</span>
+                                    </div>
+                                  </label>
+                                </div>
+                              ))}
+                              
+                              {/* Load More Button */}
+                              {userPagination.page < userPagination.totalPages && (
+                                <div className="text-center mt-3">
+                                  <button 
+                                    type="button" 
+                                    className="btn btn-sm btn-outline-primary"
+                                    onClick={() => {
+                                      const nextPage = userPage + 1;
+                                      setUserPage(nextPage);
+                                      if (formData.target_type === 'individual_patient') {
+                                        fetchPatients(nextPage, userSearch);
+                                      } else {
+                                        fetchDoctors(nextPage, userSearch);
+                                      }
+                                    }}
+                                    disabled={loadingUsers}
+                                  >
+                                    {loadingUsers ? 'Loading...' : 'Load More'}
+                                  </button>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                        
+                        <div className="d-flex justify-content-between align-items-center mt-2">
+                          <small className="text-muted">
+                            <i className="fas fa-users me-1"></i>
+                            {selectedUsers.length} selected | Showing {(formData.target_type === 'individual_patient' ? patients : doctors).length} of {userPagination.total || 0}
+                          </small>
+                          {selectedUsers.length > 0 && (
+                            <button 
+                              type="button" 
+                              className="btn btn-sm btn-outline-secondary"
+                              onClick={() => setSelectedUsers([])}
+                            >
+                              Clear All
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="col-12 mb-3">
                       <label className="form-label">Redirect Link (Optional)</label>
