@@ -1621,6 +1621,149 @@ const MasterLayout = ({ children }) => {
   <ul className='sidebar-submenu'>
 
 
+
+
+
+    {/* Outdoor Master Dropdown */}
+    <li className='dropdown'>
+      <Link to='#'>
+        <Icon icon='mdi:home-outline' className='menu-icon' style={{fontSize: '14px', marginRight: '8px'}} />
+        <span>Outdoor Master</span>
+      </Link>
+      <ul className='sidebar-submenu'>
+        <li>
+          <NavLink
+            to='/OutdoorParameterSetup'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:cog' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Outdoor Parameter Setup
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to='/ServiceMaster'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:room-service' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Service Master
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to='/OutdoorOtherChargeMaster'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:currency-usd' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Outdoor Other Charge Master
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to='/RoomNoMaster'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:door' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Room No Master
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to='/VisitTypeGrpMaster'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:group' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Visit Type Group Master
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to='/ChiefMaster'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:account-tie' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Chief Master
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to='/DiagoMaster'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:medical-bag' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Diagnosis Master
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to='/PastHistoryMaster'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:history' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Past History Master
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to='/DoseMaster'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:pill' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Dose Master
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to='/AdviceMaster'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:comment-text' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Advice Master
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to='/VisitourMaster'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:account-group' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Visitor Master
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to='/VisittypegrpMaster'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:format-list-group' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Visit Type Group Master
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to='/VisittypeMaster'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:format-list-bulleted' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Visit Type Master
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to='/CompanymstMaster'
+            className={(navData) => navData.isActive ? "active-page" : ""}
+          >
+            <Icon icon='mdi:office-building' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
+            Company Master
+          </NavLink>
+        </li>
+      </ul>
+    </li>
+
+
+
+
+
 <li>
       <NavLink
         to='/AcHeadGroupManagement'
@@ -1794,141 +1937,7 @@ const MasterLayout = ({ children }) => {
       </NavLink>
     </li>
 
-    {/* Outdoor Master Dropdown */}
-    <li className='dropdown'>
-      <Link to='#'>
-        <Icon icon='mdi:home-outline' className='menu-icon' style={{fontSize: '14px', marginRight: '8px'}} />
-        <span>Outdoor Master</span>
-      </Link>
-      <ul className='sidebar-submenu'>
-        <li>
-          <NavLink
-            to='/OutdoorParameterSetup'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:cog' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Outdoor Parameter Setup
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to='/ServiceMaster'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:room-service' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Service Master
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to='/OutdoorOtherChargeMaster'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:currency-usd' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Outdoor Other Charge Master
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to='/RoomNoMaster'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:door' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Room No Master
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to='/VisitTypeGrpMaster'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:group' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Visit Type Group Master
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to='/ChiefMaster'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:account-tie' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Chief Master
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to='/DiagoMaster'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:medical-bag' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Diagnosis Master
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to='/PastHistoryMaster'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:history' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Past History Master
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to='/DoseMaster'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:pill' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Dose Master
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to='/AdviceMaster'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:comment-text' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Advice Master
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to='/VisitourMaster'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:account-group' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Visitor Master
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to='/VisittypegrpMaster'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:format-list-group' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Visit Type Group Master
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to='/VisittypeMaster'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:format-list-bulleted' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Visit Type Master
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to='/CompanymstMaster'
-            className={(navData) => navData.isActive ? "active-page" : ""}
-          >
-            <Icon icon='mdi:office-building' className='menu-icon' style={{fontSize: '12px', marginRight: '6px'}} />
-            Company Master
-          </NavLink>
-        </li>
-      </ul>
-    </li>
+
 
 
 
