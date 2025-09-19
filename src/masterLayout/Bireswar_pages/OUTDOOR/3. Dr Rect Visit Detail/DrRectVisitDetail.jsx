@@ -1,16 +1,18 @@
 import React, { useState, useRef } from 'react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import axiosInstance from '../../../../axiosInstance';
 import MasterLayout from '../../../MasterLayout';
 import Breadcrumb from '../../../Breadcrumb';
 
 const DrRectVisitDetail = () => {
   const fromDateRef = useRef();
   const toDateRef = useRef();
-  const [viewOption, setViewOption] = useState('DoctorWise');
+  const [viewOption, setViewOption] = useState('UserWise');
   const [doctorSelect, setDoctorSelect] = useState('allDoctors');
   const [selectedDoctors, setSelectedDoctors] = useState([]);
-  const [reportType, setReportType] = useState('');
+  const [reportType, setReportType] = useState('All');
+  const [loading, setLoading] = useState(false);
 
   // Sample dynamic data (replace with your actual data fetching logic)
   const reportData = {
@@ -79,7 +81,42 @@ const DrRectVisitDetail = () => {
     });
   };
 
-  const handlePrintReport = () => {
+  const handlePrintReport = async () => {
+    const fromDate = fromDateRef.current?.value;
+    const toDate = toDateRef.current?.value;
+    
+    if (!fromDate || !toDate) {
+      alert('Please select both From and To dates');
+      return;
+    }
+    
+    if (viewOption !== 'UserWise' || doctorSelect !== 'allDoctors' || reportType !== 'All') {
+      alert('Please select: View Options = UserWise, Doctor Selection = All Doctors, Report Type = All');
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      const response = await axiosInstance.get(`/patient-visits/date-range?fromDate=${fromDate}&toDate=${toDate}`);
+      const apiData = response.data.data;
+      
+      if (!apiData || apiData.length === 0) {
+        alert('No data found for the selected date range');
+        setLoading(false);
+        return;
+      }
+      
+      generatePDFWithData(apiData, fromDate, toDate);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      alert('Error fetching data from server');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const generatePDFWithData = (data, fromDate, toDate) => {
     const doc = new jsPDF("p", "mm", "a4");
     const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -98,14 +135,12 @@ const DrRectVisitDetail = () => {
     doc.setFontSize(11);
     doc.text("DATE WISE DOCTOR WISE VISIT (ALL_DETAIL)", pageWidth / 2, 25, { align: "center" });
 
-    // ===== Date Range (next line) =====
+    // ===== Date Range =====
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
-    const fromDate = fromDateRef.current?.value || '01/Sep/2023';
-    const toDate = toDateRef.current?.value || '24/Sep/2023';
     doc.text(`Date : ${fromDate}`, 15, 32);
     doc.text(`To : ${toDate}`, 60, 32);
-    doc.text("Page 1 of 22", pageWidth - 30, 32);
+    doc.text(`Page 1 of 1`, pageWidth - 30, 32);
 
     // ===== Table Header =====
     const head = [
@@ -118,7 +153,7 @@ const DrRectVisitDetail = () => {
       theme: "plain",
       startY: 38,
       headStyles: {
-        fillColor: [0, 128, 0], // medical green
+        fillColor: [0, 128, 0],
         textColor: [255, 255, 255],
         fontStyle: "bold",
         halign: "center",
@@ -129,56 +164,105 @@ const DrRectVisitDetail = () => {
     });
 
     let currentY = doc.lastAutoTable.finalY + 5;
+    
+    // Group data by doctor
+    const groupedByDoctor = data.reduce((acc, visit) => {
+      const doctorName = visit.DoctorName || 'Unknown Doctor';
+      if (!acc[doctorName]) {
+        acc[doctorName] = [];
+      }
+      acc[doctorName].push(visit);
+      return acc;
+    }, {});
+    
+    let totalProfChrg = 0;
+    let totalDiscount = 0;
+    let totalAmount = 0;
+    let totalRecAmt = 0;
+    
+    Object.entries(groupedByDoctor).forEach(([doctorName, visits]) => {
+      // ===== Visit Date Row =====
+      doc.setTextColor(128, 0, 128);
+      doc.setFontSize(9);
+      doc.text(`Visit Date : ${fromDate}`, 15, currentY);
+      currentY += 6;
 
-    // ===== Visit Date Row =====
-    doc.setTextColor(128, 0, 128); // purple
-    doc.setFontSize(9);
-    doc.text(`Visit Date : ${fromDate}`, 15, currentY);
-    currentY += 6;
+      // ===== Consultant Row =====
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Consultant ${doctorName}`, 15, currentY);
+      currentY += 6;
 
-    // ===== Consultant Row =====
-    doc.setTextColor(0, 0, 0);
-    doc.setFont("helvetica", "bold");
-    doc.text("Consultant Dr. MD.SALAHUDDIN", 15, currentY);
-    currentY += 6;
+      // ===== CASH Row =====
+      doc.text("CASH", 15, currentY);
+      currentY += 4;
 
-    // ===== CASH Row =====
-    doc.text("CASH", 15, currentY);
-    currentY += 4;
+      // ===== Patient Data Table =====
+      const patientData = visits.map(visit => [
+        visit.RegistrationNo || '',
+        visit.PatientName || '',
+        visit.CancelYN || '',
+        visit.BookingYN || '',
+        (visit.Rate || 0).toFixed(2),
+        (visit.Discount || 0).toFixed(2),
+        (visit.TotAmount || 0).toFixed(2),
+        (visit.RecAmt || 0).toFixed(2),
+        visit.UserId || ''
+      ]);
 
-    // ===== Patient Data Table =====
-    const patientData = [
-      ["RRR00351", "MOUSUMI SARKAR", "", "", "500.00", "", "600.00", "600.00", "SANJAY ST."],
-    ];
+      autoTable(doc, {
+        head: [],
+        body: patientData,
+        startY: currentY,
+        theme: "plain",
+        styles: { fontSize: 9, halign: "center", cellPadding: 2 },
+        margin: { left: 15, right: 15 },
+        tableWidth: "auto",
+      });
+      
+      // Calculate totals for this doctor
+      const doctorProfChrg = visits.reduce((sum, v) => sum + (v.Rate || 0), 0);
+      const doctorDiscount = visits.reduce((sum, v) => sum + (v.Discount || 0), 0);
+      const doctorTotalAmt = visits.reduce((sum, v) => sum + (v.TotAmount || 0), 0);
+      const doctorRecAmt = visits.reduce((sum, v) => sum + (v.RecAmt || 0), 0);
+      
+      totalProfChrg += doctorProfChrg;
+      totalDiscount += doctorDiscount;
+      totalAmount += doctorTotalAmt;
+      totalRecAmt += doctorRecAmt;
 
+      // ===== Paymode Total Row =====
+      autoTable(doc, {
+        body: [[{ content: `Paymode Total : ${doctorProfChrg.toFixed(2)} ${doctorDiscount.toFixed(2)} ${doctorTotalAmt.toFixed(2)} ${doctorRecAmt.toFixed(2)}`, styles: { fontStyle: "bold", halign: "left" } }]],
+        theme: "plain",
+        startY: doc.lastAutoTable.finalY + 3,
+        styles: { fontSize: 9, cellPadding: 3 },
+        bodyStyles: { lineColor: [255, 0, 0], lineWidth: 0.6 },
+        margin: { left: 15, right: 15 },
+        tableWidth: "auto",
+      });
+
+      // ===== Doctor Total Row =====
+      autoTable(doc, {
+        body: [[{ content: `Doctor Total : ${doctorProfChrg.toFixed(2)} ${doctorDiscount.toFixed(2)} ${doctorTotalAmt.toFixed(2)} ${doctorRecAmt.toFixed(2)}`, styles: { fontStyle: "bold", halign: "left" } }]],
+        theme: "plain",
+        startY: doc.lastAutoTable.finalY + 2,
+        styles: { fontSize: 9, cellPadding: 3 },
+        bodyStyles: { lineColor: [255, 0, 0], lineWidth: 0.6 },
+        margin: { left: 15, right: 15 },
+        tableWidth: "auto",
+      });
+      
+      currentY = doc.lastAutoTable.finalY + 10;
+    });
+    
+    // ===== Grand Total =====
     autoTable(doc, {
-      head: [],
-      body: patientData,
+      body: [[{ content: `Grand Total : ${totalProfChrg.toFixed(2)} ${totalDiscount.toFixed(2)} ${totalAmount.toFixed(2)} ${totalRecAmt.toFixed(2)}`, styles: { fontStyle: "bold", halign: "left", fontSize: 10 } }]],
+      theme: "plain",
       startY: currentY,
-      theme: "plain",
-      styles: { fontSize: 9, halign: "center", cellPadding: 2 },
-      margin: { left: 15, right: 15 },
-      tableWidth: "auto",
-    });
-
-    // ===== Paymode Total Row (Red Box, no column division) =====
-    autoTable(doc, {
-      body: [[{ content: "Paymode Total : 500.00 600.00 600.00", styles: { fontStyle: "bold", halign: "left" } }]],
-      theme: "plain",
-      startY: doc.lastAutoTable.finalY + 3,
-      styles: { fontSize: 9, cellPadding: 3 },
-      bodyStyles: { lineColor: [255, 0, 0], lineWidth: 0.6 },
-      margin: { left: 15, right: 15 },
-      tableWidth: "auto",
-    });
-
-    // ===== Doctor Total Row (Red Box, no column division) =====
-    autoTable(doc, {
-      body: [[{ content: "Doctor Total : 500.00 0.00 600.00 600.00", styles: { fontStyle: "bold", halign: "left" } }]],
-      theme: "plain",
-      startY: doc.lastAutoTable.finalY + 2,
-      styles: { fontSize: 9, cellPadding: 3 },
-      bodyStyles: { lineColor: [255, 0, 0], lineWidth: 0.6 },
+      styles: { fontSize: 10, cellPadding: 4 },
+      bodyStyles: { lineColor: [0, 0, 255], lineWidth: 1 },
       margin: { left: 15, right: 15 },
       tableWidth: "auto",
     });
@@ -334,8 +418,9 @@ const DrRectVisitDetail = () => {
                 type="button" 
                 className="btn btn-primary me-2 px-4 py-2" 
                 onClick={handlePrintReport}
+                disabled={loading}
               >
-                Print Report
+                {loading ? 'Loading...' : 'Print Report'}
               </button>
               <button type="button" className="btn btn-outline-secondary px-4 py-2">
                 Close
