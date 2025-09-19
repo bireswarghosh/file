@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import MasterLayout from '../../../MasterLayout';
 import Breadcrumb from '../../../Breadcrumb';
 
@@ -80,101 +80,110 @@ const DrRectVisitDetail = () => {
   };
 
   const handlePrintReport = () => {
-    const doc = new jsPDF();
+    const doc = new jsPDF("p", "mm", "a4");
+    const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Define styles for better visual appearance
-    const headerStyles = { fontSize: 16, fontWeight: 'bold', textColor: [0, 0, 0] };
-    const subHeaderStyles = { fontSize: 12, textColor: [0, 0, 0] };
-    const tableHeaderStyles = { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontSize: 10, fontStyle: 'bold' };
-    const tableRowStyles = { fontSize: 9, textColor: [0, 0, 0] };
-    const totalStyles = { fontSize: 10, fontStyle: 'bold', textColor: [0, 0, 0] };
+    // ===== Clinic Header =====
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("LORDS DIAGNOSTIC", pageWidth / 2, 12, { align: "center" });
 
-    let yPosition = 15;
-    const margin = 10;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text("13/3, CIRCULAR 2ND BYE LANE,", pageWidth / 2, 17, { align: "center" });
 
-    // Company Information
-    doc.setFontSize(headerStyles.fontSize);
-    doc.setFont('helvetica', 'bold');
-    doc.text(reportData.companyName, margin, yPosition);
-    yPosition += 5;
-    doc.setFontSize(subHeaderStyles.fontSize);
-    doc.setFont('helvetica', 'normal');
-    doc.text(reportData.companyAddress, margin, yPosition);
-    yPosition += 10;
+    // ===== Report Title =====
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(200, 0, 0);
+    doc.setFontSize(11);
+    doc.text("DATE WISE DOCTOR WISE VISIT (ALL_DETAIL)", pageWidth / 2, 25, { align: "center" });
 
-    // Report Title and Date Range
-    doc.setFontSize(headerStyles.fontSize);
-    doc.setFont('helvetica', 'bold');
-    doc.text(reportData.title, margin, yPosition);
-    yPosition += 7;
-    doc.setFontSize(subHeaderStyles.fontSize);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Date: ${reportData.dateRange.from} To : ${reportData.dateRange.to}`, margin, yPosition);
-    doc.text(reportData.pageNumber, doc.internal.pageSize.getWidth() - margin - doc.getTextWidth(reportData.pageNumber), yPosition);
-    yPosition += 10;
+    // ===== Date Range (next line) =====
+    doc.setFontSize(9);
+    doc.setTextColor(0, 0, 0);
+    const fromDate = fromDateRef.current?.value || '01/Sep/2023';
+    const toDate = toDateRef.current?.value || '24/Sep/2023';
+    doc.text(`Date : ${fromDate}`, 15, 32);
+    doc.text(`To : ${toDate}`, 60, 32);
+    doc.text("Page 1 of 22", pageWidth - 30, 32);
 
-    reportData.visits.forEach((visit) => {
-      doc.setFontSize(subHeaderStyles.fontSize);
-      doc.setFont('helvetica', 'bold');
-      doc.text(visit.doctor, margin, yPosition);
-      yPosition += 5;
-      doc.setFont('helvetica', 'normal');
-      doc.text(visit.category, margin, yPosition);
-      yPosition += 7;
+    // ===== Table Header =====
+    const head = [
+      ["Visit No", "Patient Name", "Cancel", "Booking", "Prof.Chrg", "Discount", "Total Amt.", "recamt", "Entry By"],
+    ];
 
-      // Table Headers
-      const headers = ['Visit No', 'Patient Name', 'Prof.Chrg', 'Discount', 'Total Amt.', 'Rec. Amt.', 'Entry By'];
-      const tableData = visit.patients.map((patient) => [
-        patient.visitNo,
-        patient.patientName,
-        patient.profChrg.toFixed(2),
-        patient.discount || '',
-        patient.totalAmt.toFixed(2),
-        patient.recAmt.toFixed(2),
-        patient.entryBy,
-      ]);
-
-      doc.autoTable({
-        head: [headers],
-        body: tableData,
-        startY: yPosition,
-        margin: { left: margin, right: margin },
-        styles: tableRowStyles,
-        headStyles: tableHeaderStyles,
-      });
-
-      yPosition = doc.autoTable.previous.finalY + 5;
-
-      // Paymode Total
-      doc.setFontSize(totalStyles.fontSize);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`Paymode Total:`, margin, yPosition, { align: 'left' });
-      doc.text(visit.paymodeTotal.toFixed(2), margin + 100, yPosition, { align: 'left' });
-      yPosition += 5;
-
-      // Doctor Total
-      doc.text(`Doctor Total:`, margin, yPosition, { align: 'left' });
-      doc.text(visit.doctorTotal.toFixed(2), margin + 100, yPosition, { align: 'left' });
-      yPosition += 10;
+    autoTable(doc, {
+      head: head,
+      body: [],
+      theme: "plain",
+      startY: 38,
+      headStyles: {
+        fillColor: [0, 128, 0], // medical green
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+        halign: "center",
+      },
+      styles: { fontSize: 9, halign: "center", cellPadding: 2 },
+      margin: { left: 15, right: 15 },
+      tableWidth: "auto",
     });
 
-    // Day Total
-    doc.setFontSize(totalStyles.fontSize);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`Day Total:`, margin, yPosition, { align: 'left' });
-    doc.text(reportData.dayTotal.toFixed(2), margin + 100, yPosition, { align: 'left' });
-    yPosition += 5;
+    let currentY = doc.lastAutoTable.finalY + 5;
 
-    // Day Discount
-    doc.text(`Day Discount:`, margin, yPosition, { align: 'left' });
-    doc.text(reportData.dayDiscount.toFixed(2), margin + 100, yPosition, { align: 'left' });
-    yPosition += 5;
+    // ===== Visit Date Row =====
+    doc.setTextColor(128, 0, 128); // purple
+    doc.setFontSize(9);
+    doc.text(`Visit Date : ${fromDate}`, 15, currentY);
+    currentY += 6;
 
-    // Day Grand Total
-    doc.text(`Day Grand Total:`, margin, yPosition, { align: 'left' });
-    doc.text(reportData.dayGrandTotal.toFixed(2), margin + 100, yPosition, { align: 'left' });
+    // ===== Consultant Row =====
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "bold");
+    doc.text("Consultant Dr. MD.SALAHUDDIN", 15, currentY);
+    currentY += 6;
 
-    // Open PDF in new tab
+    // ===== CASH Row =====
+    doc.text("CASH", 15, currentY);
+    currentY += 4;
+
+    // ===== Patient Data Table =====
+    const patientData = [
+      ["RRR00351", "MOUSUMI SARKAR", "", "", "500.00", "", "600.00", "600.00", "SANJAY ST."],
+    ];
+
+    autoTable(doc, {
+      head: [],
+      body: patientData,
+      startY: currentY,
+      theme: "plain",
+      styles: { fontSize: 9, halign: "center", cellPadding: 2 },
+      margin: { left: 15, right: 15 },
+      tableWidth: "auto",
+    });
+
+    // ===== Paymode Total Row (Red Box, no column division) =====
+    autoTable(doc, {
+      body: [[{ content: "Paymode Total : 500.00 600.00 600.00", styles: { fontStyle: "bold", halign: "left" } }]],
+      theme: "plain",
+      startY: doc.lastAutoTable.finalY + 3,
+      styles: { fontSize: 9, cellPadding: 3 },
+      bodyStyles: { lineColor: [255, 0, 0], lineWidth: 0.6 },
+      margin: { left: 15, right: 15 },
+      tableWidth: "auto",
+    });
+
+    // ===== Doctor Total Row (Red Box, no column division) =====
+    autoTable(doc, {
+      body: [[{ content: "Doctor Total : 500.00 0.00 600.00 600.00", styles: { fontStyle: "bold", halign: "left" } }]],
+      theme: "plain",
+      startY: doc.lastAutoTable.finalY + 2,
+      styles: { fontSize: 9, cellPadding: 3 },
+      bodyStyles: { lineColor: [255, 0, 0], lineWidth: 0.6 },
+      margin: { left: 15, right: 15 },
+      tableWidth: "auto",
+    });
+
+    // ===== Open PDF in new tab =====
     window.open(doc.output('bloburl'), '_blank');
   };
 
@@ -296,7 +305,7 @@ const DrRectVisitDetail = () => {
               <h6 className="fw-bold mb-3 text-dark">Report Type</h6>
               <div className="row g-3">
                 {[
-                  'Only Doctor Ch.', 'Only Service Ch.', "Doctor's Ch. (Summary)",
+                  'All','Only Doctor Ch.', 'Only Service Ch.', "Doctor's Ch. (Summary)",
                   'Visit ID Wise', 'Visit Type Wise', 'Visit Type User Wise',
                   'Registration No Wise', 'Visit Type grp Wise', 'COMPANY WISE'
                 ].map((opt, index) => (
