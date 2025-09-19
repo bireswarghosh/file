@@ -4,8 +4,8 @@ import { Paper, IconButton, TextField, Button, Box, Card, CardContent, Dialog, D
 import { Edit, Delete, Visibility, Search } from '@mui/icons-material';
 import MasterLayout from '../../../MasterLayout';
 import Breadcrumb from '../../../Breadcrumb';
-import axiosInstance from '../../../../axiosInstance';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../../../axiosInstance';
 
 const Visit_list = () => {
   const [visits, setVisits] = useState([]);
@@ -22,61 +22,35 @@ const Visit_list = () => {
   const fetchVisits = async (phone = '', date = '', registrationId = '', page = 1, limit = 100) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      let url;
-      
-      // If searching by Registration ID, use specific endpoint
-      if (registrationId) {
-        url = `/patient-with-bills/search-by-registration?registrationId=${registrationId}`;
-      } else {
-        url = `/patient-with-bills?page=${page}&limit=${limit}`;
-        if (phone) url += `&phone=${phone}`;
-        if (date) url += `&date=${date}`;
-      }
-      
-      const response = await axiosInstance.get(url, {
-        headers: { Authorization: `Bearer ${token}` }
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(phone && { search: phone }),
+        ...(registrationId && { registrationId }),
+        ...(date && { fromDate: date, toDate: date })
       });
       
+      const response = await axiosInstance.get(`/patient-visits?${params}`);
+      
       if (response.data?.success) {
-        let data;
-        
-        // Handle Registration ID search response (single patient)
-        if (registrationId && response.data.data.patient) {
-          const patient = response.data.data.patient;
-          data = [{
-            id: patient.RegistrationId,
-            RegistrationId: patient.RegistrationId,
-            PatientName: patient.PatientName,
-            PhoneNo: patient.PhoneNo,
-            Age: patient.Age,
-            Sex: patient.Sex,
-            Add1: patient.Add1,
-            RegDate: new Date().toLocaleDateString(), // No RegDate in response
-            RegTime: '', // No RegTime in response
-            billsCount: response.data.data.totalBills || 0,
-            totalAmount: response.data.data.totalAmount || 0
-          }];
-          setRowCount(1);
-        } else {
-          // Handle regular search response (array of patients)
-          data = response.data.data.map(item => ({
-            id: item.RegistrationId,
-            RegistrationId: item.RegistrationId,
-            PatientName: item.PatientName,
-            PhoneNo: item.PhoneNo,
-            Age: item.Age,
-            Sex: item.Sex,
-            Add1: item.Add1,
-            RegDate: new Date(item.RegDate).toLocaleDateString(),
-            RegTime: item.RegTime,
-            billsCount: item.billCount || 0,
-            totalAmount: item.totalAmount || 0
-          }));
-          setRowCount(response.data.pagination?.total || 0);
-        }
+        const data = response.data.data.map(item => ({
+          id: item.PVisitId,
+          RegistrationId: item.RegistrationId,
+          PatientName: item.PatientName,
+          PhoneNo: item.PhoneNo,
+          Age: item.Age,
+          Sex: item.Sex === 'M' ? 'Male' : item.Sex === 'F' ? 'Female' : item.Sex,
+          Add1: item.PatientAdd1,
+          RegDate: item.PVisitDate ? item.PVisitDate.split('T')[0] : 'N/A',
+          RegTime: item.vTime,
+          DoctorName: item.DoctorName,
+          SpecialityName: item.SpecialityName,
+          TotAmount: item.TotAmount || 0,
+          PVisitId: item.PVisitId
+        }));
         
         setVisits(data);
+        setRowCount(response.data.pagination?.total || 0);
       }
     } catch (error) {
       console.error('Error fetching visits:', error);
@@ -103,14 +77,10 @@ const Visit_list = () => {
 
   const handleView = async (patient) => {
     try {
-      // Fetch complete patient data with bills
-      const regNum = patient.RegistrationId.split('/')[0];
-      const year = patient.RegistrationId.split('/')[1];
-      const response = await axiosInstance.get(`/outdoor-visit-entry/${regNum}/${year}`);
+      const response = await axiosInstance.get(`/patient-visits/${patient.PVisitId}`);
       
       if (response.data?.success) {
         const fullData = response.data.data;
-        // Navigate to New.jsx with view mode and full data
         navigate('/visit_entry', { 
           state: { 
             mode: 'view',
@@ -127,14 +97,10 @@ const Visit_list = () => {
 
   const handleEdit = async (patient) => {
     try {
-      // Fetch complete patient data with bills
-      const regNum = patient.RegistrationId.split('/')[0];
-      const year = patient.RegistrationId.split('/')[1];
-      const response = await axiosInstance.get(`/outdoor-visit-entry/${regNum}/${year}`);
+      const response = await axiosInstance.get(`/patient-visits/${patient.PVisitId}`);
       
       if (response.data?.success) {
         const fullData = response.data.data;
-        // Navigate to New.jsx with edit mode and full data
         navigate('/visit_entry', { 
           state: { 
             mode: 'edit',
@@ -151,37 +117,29 @@ const Visit_list = () => {
 
   const handleUpdatePatient = async () => {
     try {
-      const regNum = editDialog.patient.RegistrationId.split('/')[0];
-      const year = editDialog.patient.RegistrationId.split('/')[1];
-      
-      const response = await axiosInstance.put(`/outdoor-visit-entry/${regNum}/${year}`, {
-        patientData: editForm
-      });
+      const response = await axiosInstance.put(`/patient-visits/${editDialog.patient.PVisitId}`, editForm);
       
       if (response.data?.success) {
-        alert('Patient updated successfully!');
+        alert('Patient visit updated successfully!');
         setEditDialog({ open: false, patient: null });
         fetchVisits(searchPhone, searchDate, searchRegistrationId, paginationModel.page + 1, paginationModel.pageSize);
       }
     } catch (error) {
-      alert('Error updating patient: ' + error.message);
+      alert('Error updating patient visit: ' + error.message);
     }
   };
 
   const handleDelete = async (patient) => {
-    if (window.confirm(`Are you sure you want to delete ${patient.PatientName}?`)) {
+    if (window.confirm(`Are you sure you want to delete visit for ${patient.PatientName}?`)) {
       try {
-        const regNum = patient.RegistrationId.split('/')[0];
-        const year = patient.RegistrationId.split('/')[1];
-        
-        const response = await axiosInstance.delete(`/outdoor-visit-entry/${regNum}/${year}`);
+        const response = await axiosInstance.delete(`/patient-visits/${patient.PVisitId}`);
         
         if (response.data?.success) {
-          alert('Patient deleted successfully!');
+          alert('Patient visit deleted successfully!');
           fetchVisits(searchPhone, searchDate, searchRegistrationId, paginationModel.page + 1, paginationModel.pageSize);
         }
       } catch (error) {
-        alert('Error deleting patient: ' + error.message);
+        alert('Error deleting patient visit: ' + error.message);
       }
     }
   };
@@ -226,11 +184,12 @@ const Visit_list = () => {
     { field: 'PhoneNo', headerName: 'Phone', width: 130 },
     { field: 'Age', headerName: 'Age', width: 80 },
     { field: 'Sex', headerName: 'Gender', width: 100 },
-    { field: 'Add1', headerName: 'Address', width: 250 },
-    { field: 'RegDate', headerName: 'Registration Date', width: 150 },
+    { field: 'Add1', headerName: 'Address', width: 200 },
+    { field: 'RegDate', headerName: 'Visit Date', width: 120 },
     { field: 'RegTime', headerName: 'Time', width: 100 },
-    { field: 'billsCount', headerName: 'Bills', width: 80 },
-    { field: 'totalAmount', headerName: 'Total Amount', width: 120, 
+    { field: 'DoctorName', headerName: 'Doctor', width: 150 },
+    { field: 'SpecialityName', headerName: 'Department', width: 150 },
+    { field: 'TotAmount', headerName: 'Amount', width: 120, 
       valueFormatter: (params) => `₹${params.value?.toFixed(2) || '0.00'}` },
    
   ];

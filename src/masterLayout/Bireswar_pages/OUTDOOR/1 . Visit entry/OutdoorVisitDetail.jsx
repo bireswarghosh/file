@@ -69,10 +69,13 @@ const OutdoorVisitDetail = () => {
     OutBillDate: new Date().toISOString().split('T')[0],
     RegistrationTime: new Date().toTimeString().slice(0, 5),
     RegCh: '0.00',
-    proffCh: '0.00',
+    Rate: '0.00',
     svrCh: '0.00',
     pDisc: '0.00',
+    Discount: '0.00',
     proffDisc: '0.00',
+    proffDiscAmt: '0.00',
+    discp: '0.00',
     srvChDisc: '0.00',
     billAmt: '0.00',
     narration: '',
@@ -187,87 +190,75 @@ const OutdoorVisitDetail = () => {
         }
         
         setFormData({
-          // Booking fields
-          Booking: data.Booking || 'N',
-          RegistrationDate: data.RegistrationDate ? new Date(data.RegistrationDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-          RegistrationTime: data.RegistrationTime || new Date().toTimeString().slice(0, 5),
-          quota: data.quota || false,
-          queueNo: data.queueNo || 0,
-          // Registration fields
-          OPD: data.OPD || 'N',
+          // Patient Visit fields
+          PVisitId: data.PVisitId,
+          RegistrationId: data.RegistrationId || '',
+          PVisitDate: data.PVisitDate ? data.PVisitDate.split('T')[0] : new Date().toISOString().split('T')[0],
+          vTime: data.vTime || new Date().toTimeString().slice(0, 5),
+          // Patient Registration fields
           PatientName: data.PatientName || '',
           PhoneNo: data.PhoneNo || '',
-          RegistrationId: data.RegistrationId || '',
-          registrationNo: data.registrationNo || '',
-          // Patient fields
+          Age: data.Age?.toString() || '',
+          Sex: data.Sex || '',
+          Add1: data.PatientAdd1 || data.Add1 || '',
+          Add2: data.PatientAdd2 || data.Add2 || '',
+          Add3: data.PatientAdd3 || data.Add3 || '',
+          fullAddress: data.PatientAdd1 || data.Add1 || '',
           PPr: data.PPr || '',
           GurdianName: data.GurdianName || '',
           CareOf: data.CareOf || '',
-          Sex: data.Sex || '',
           MStatus: data.MStatus || '',
-          dob: data.Dob ? new Date(data.Dob).toISOString().split('T')[0] : '',
-          Age: data.Age?.toString() || '',
+          dob: data.Dob ? data.Dob.split('T')[0] : '',
           AgeD: data.AgeD?.toString() || '',
           AgeN: data.AgeN?.toString() || '',
-          Add1: data.Add1 || '',
-          Add2: data.Add2 || '',
-          Add3: data.Add3 || '',
-          fullAddress: data.Add1 || '',
           email: data.EMailId || '',
           ReligionId: data.ReligionId?.toString() || '',
-          Weight: data.Weight?.toString() || '',
+          Weight: data.Weight?.toString() || data.PatientWeight?.toString() || '',
           Height: data.Height?.toString() || '',
-          BpMin: data.bpmin?.toString() || '',
-          BpMax: data.bpmax?.toString() || '',
+          BpMin: data.BpMin?.toString() || data.bpmin?.toString() || '',
+          BpMax: data.BpMax?.toString() || data.bpmax?.toString() || '',
           BloodGroup: data.BloodGroup || '',
-          Company: data.Company || '',
-          emergencyContact: data.emergencyContact || '',
-          // Doctor fields (from first bill if exists)
-          ...(data.outdoorbills?.[0] && {
-            DepartmentId: data.outdoorbills[0].department?.toString() || '',
-            doctorId: data.outdoorbills[0].DoctorId?.toString() || '',
-            docName: doctorName,
-            // Billing fields
-            billNo: data.outdoorbills[0].OutBillId || '',
-            OutBillDate: data.outdoorbills[0].OutBillDate ? new Date(data.outdoorbills[0].OutBillDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-            RegistrationTime: data.outdoorbills[0].RegistrationTime || new Date().toTimeString().slice(0, 5),
-            RegCh: data.outdoorbills[0].RegCh?.toString() || '0.00',
-            proffCh: data.outdoorbills[0].ProfCh?.toString() || '0.00',
-            svrCh: data.outdoorbills[0].ServiceCh?.toString() || '0.00',
-            pDisc: data.outdoorbills[0].pDisc?.toString() || '0.00',
-            proffDisc: data.outdoorbills[0].proffDisc?.toString() || '0.00',
-            srvChDisc: data.outdoorbills[0].srvChDisc?.toString() || '0.00',
-            billAmt: data.outdoorbills[0].Amount?.toString() || '0.00',
-            narration: data.outdoorbills[0].narration || '',
-            dueamt: data.outdoorbills[0].dueamt?.toString() || '',
-            paidamt: data.outdoorbills[0].paidamt?.toString() || ''
-          })
+          // Doctor and Department fields
+          DepartmentId: data.SpecialityId?.toString() || '',
+          doctorId: data.DoctorId?.toString() || '',
+          docName: data.DoctorName || doctorName,
+          // Billing fields from PatientVisit
+          billNo: data.PVisitId || '',
+          OutBillDate: data.PVisitDate ? data.PVisitDate.split('T')[0] : new Date().toISOString().split('T')[0],
+          RegistrationTime: data.vTime || new Date().toTimeString().slice(0, 5),
+          RegCh: data.RegCh?.toString() || '0.00',
+          Rate: data.Rate?.toString() || '0.00',
+          svrCh: data.ServiceCh?.toString() || '0.00',
+          pDisc: '0.00',
+          Discount: data.Discount?.toString() || '0.00',
+          discp: data.discp?.toString() || '0.00',
+          srvChDisc: data.SrvChDisc?.toString() || '0.00',
+          billAmt: data.TotAmount?.toString() || '0.00',
+          narration: data.Remarks || data.Narration || '',
+          dueamt: data.DueAmt?.toString() || '',
+          paidamt: data.RecAmt?.toString() || '',
+          // Booking fields
+          Booking: 'N',
+          quota: false,
+          queueNo: data.QNo || 0,
+          OPD: 'Y'
         });
         
-        // Load existing payment methods from bill data
-        if (data.outdoorbills?.[0]) {
-          const bill = data.outdoorbills[0];
-          console.log('Bill data for payment methods:', bill);
+        // Load existing payment methods from patient visit data
+        if (data.RecAmt && parseFloat(data.RecAmt) > 0) {
           const existingPayments = [];
           
-          // Create payment method from existing data
-          if (bill.paidamt && parseFloat(bill.paidamt) > 0) {
-            const paymentMethod = {
-              type: bill.PaymentType?.toString() || '0',
-              amount: bill.paidamt?.toString() || '',
-              upiApp: bill.PaymentType === 1 ? (bill.BANK || '') : '',
-              utrNumber: bill.PaymentType === 1 ? (bill.Cheque || '') : '',
-              bankName: bill.PaymentType === 2 ? (bill.BANK || '') : '',
-              chequeNumber: bill.PaymentType === 2 ? (bill.Cheque || '') : ''
-            };
-            console.log('Created payment method:', paymentMethod);
-            existingPayments.push(paymentMethod);
-          }
+          const paymentMethod = {
+            type: data.PaymentType?.toString() || '0',
+            amount: data.RecAmt?.toString() || '',
+            upiApp: data.PaymentType === 1 ? (data.BANK || '') : '',
+            utrNumber: data.PaymentType === 1 ? (data.Cheque || '') : '',
+            bankName: data.PaymentType === 2 ? (data.BANK || '') : '',
+            chequeNumber: data.PaymentType === 2 ? (data.Cheque || '') : ''
+          };
           
-          // Set payment methods or default
-          if (existingPayments.length > 0) {
-            setPaymentMethods(existingPayments);
-          }
+          existingPayments.push(paymentMethod);
+          setPaymentMethods(existingPayments);
         }
       }
     } catch (error) {
@@ -284,45 +275,62 @@ const OutdoorVisitDetail = () => {
     const months = parseInt(formData.AgeD) || 0;
     const days = parseInt(formData.AgeN) || 0;
     
-    if ((years || months || days) && !formData.dob) {
-      const regDate = new Date(formData.RegistrationDate);
-      const birthDate = new Date(regDate);
-      birthDate.setFullYear(birthDate.getFullYear() - years);
-      birthDate.setMonth(birthDate.getMonth() - months);
-      birthDate.setDate(birthDate.getDate() - days);
-      const dobString = birthDate.toISOString().split('T')[0];
-      setFormData(prev => ({ ...prev, dob: dobString }));
+    if ((years || months || days) && !formData.dob && formData.RegistrationDate) {
+      try {
+        const regDate = new Date(formData.RegistrationDate);
+        if (!isNaN(regDate.getTime())) {
+          const birthDate = new Date(regDate);
+          birthDate.setFullYear(birthDate.getFullYear() - years);
+          birthDate.setMonth(birthDate.getMonth() - months);
+          birthDate.setDate(birthDate.getDate() - days);
+          if (!isNaN(birthDate.getTime())) {
+            const dobString = birthDate.toISOString().split('T')[0];
+            setFormData(prev => ({ ...prev, dob: dobString }));
+          }
+        }
+      } catch (error) {
+        console.error('Error calculating DOB:', error);
+      }
     }
   }, [formData.Age, formData.AgeD, formData.AgeN, formData.RegistrationDate]);
 
   // Auto-calculate age when DOB changes
   const handleDobChange = (value) => {
-    if (value) {
-      const birthDate = new Date(value);
-      const regDate = new Date(formData.RegistrationDate);
-      
-      let years = regDate.getFullYear() - birthDate.getFullYear();
-      let months = regDate.getMonth() - birthDate.getMonth();
-      let days = regDate.getDate() - birthDate.getDate();
-      
-      if (days < 0) {
-        months--;
-        const lastMonth = new Date(regDate.getFullYear(), regDate.getMonth(), 0);
-        days += lastMonth.getDate();
+    if (value && formData.RegistrationDate) {
+      try {
+        const birthDate = new Date(value);
+        const regDate = new Date(formData.RegistrationDate);
+        
+        if (!isNaN(birthDate.getTime()) && !isNaN(regDate.getTime())) {
+          let years = regDate.getFullYear() - birthDate.getFullYear();
+          let months = regDate.getMonth() - birthDate.getMonth();
+          let days = regDate.getDate() - birthDate.getDate();
+          
+          if (days < 0) {
+            months--;
+            const lastMonth = new Date(regDate.getFullYear(), regDate.getMonth(), 0);
+            days += lastMonth.getDate();
+          }
+          
+          if (months < 0) {
+            years--;
+            months += 12;
+          }
+          
+          setFormData(prev => ({
+            ...prev,
+            dob: value,
+            Age: years.toString(),
+            AgeD: months.toString(),
+            AgeN: days.toString()
+          }));
+        }
+      } catch (error) {
+        console.error('Error calculating age:', error);
+        setFormData(prev => ({ ...prev, dob: value }));
       }
-      
-      if (months < 0) {
-        years--;
-        months += 12;
-      }
-      
-      setFormData(prev => ({
-        ...prev,
-        dob: value,
-        Age: years.toString(),
-        AgeD: months.toString(),
-        AgeN: days.toString()
-      }));
+    } else {
+      setFormData(prev => ({ ...prev, dob: value }));
     }
   };
 
@@ -410,64 +418,48 @@ const OutdoorVisitDetail = () => {
     setIsSubmitting(true);
     
     try {
-      const patientData = {
-        PatientName: formData.PatientName?.trim(),
-        PhoneNo: formData.PhoneNo?.trim(),
-        Add1: formData.Add1 || '',
-        Add2: formData.Add2 || '',
-        Add3: formData.Add3 || '',
-        Age: formData.Age || '0',
-        AgeD: formData.AgeD ? parseInt(formData.AgeD) : null,
-        AgeN: formData.AgeN ? parseInt(formData.AgeN) : null,
-        Sex: formData.Sex || '',
-        MStatus: formData.MStatus || '',
-        PPr: formData.PPr || '',
-        CareOf: formData.CareOf || '',
-        GurdianName: formData.GurdianName || '',
-        ReligionId: formData.ReligionId ? parseInt(formData.ReligionId) : null,
-        Weight: formData.Weight || '',
-        Height: formData.Height || '',
-        BloodGroup: formData.BloodGroup || '',
-        bpmin: parseFloat(formData.BpMin) || null,
-        bpmax: parseFloat(formData.BpMax) || null,
-        Dob: formData.dob ? new Date(formData.dob).toISOString() : null,
-        EMailId: formData.email || ''
-      };
-      
-      const billData = {
-        BillAmt: parseFloat(formData.billAmt) || 0,
+      // For billing information, use patient visit API
+      const visitData = {
+        RegistrationId: formData.RegistrationId,
+        PVisitDate: formData.RegistrationDate || new Date().toISOString().split('T')[0],
+        Rate: parseFloat(formData.Rate) || 0,
+        VisitTypeId: 1,
         DoctorId: formData.doctorId ? parseInt(formData.doctorId) : null,
-        department: formData.DepartmentId ? parseInt(formData.DepartmentId) : null,
-        narration: formData.narration || '',
+        SpecialityId: formData.DepartmentId ? parseInt(formData.DepartmentId) : null,
+        TotAmount: parseFloat(formData.billAmt) || 0,
+        Weight: formData.Weight || '',
+        BpMin: parseFloat(formData.BpMin) || null,
+        BpMax: parseFloat(formData.BpMax) || null,
+        vTime: formData.RegistrationTime || '',
+        Remarks: formData.narration || '',
+        ServiceCh: parseFloat(formData.svrCh) || 0,
         RegCh: parseFloat(formData.RegCh) || 0,
-        proffCh: parseFloat(formData.proffCh) || 0,
-        svrCh: parseFloat(formData.svrCh) || 0,
-        pDisc: parseFloat(formData.pDisc) || 0,
-        proffDisc: parseFloat(formData.proffDisc) || 0,
-        srvChDisc: parseFloat(formData.srvChDisc) || 0
+        Discount: parseFloat(formData.Discount) || 0,
+        RecAmt: paymentMethods.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0),
+        DueAmt: parseFloat(formData.billAmt || 0) - paymentMethods.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0),
+        PaymentType: paymentMethods[0]?.type || '0',
+        BANK: paymentMethods[0]?.bankName || paymentMethods[0]?.upiApp || '',
+        Cheque: paymentMethods[0]?.chequeNumber || paymentMethods[0]?.utrNumber || ''
       };
       
-      const dataToSubmit = {
-        action: mode === 'edit' ? 'UPDATE' : 'CREATE',
-        patientData,
-        billData
-      };
+      if (!visitData.RegistrationId || !visitData.PVisitDate) {
+        alert('Registration ID and Visit Date are required');
+        return;
+      }
       
-      console.log('Mode:', mode, 'ID:', id, 'RegistrationId:', formData.RegistrationId);
-      
-      const patientId = id || formData.RegistrationId;
+      console.log('Mode:', mode, 'ID:', id, 'PVisitId:', formData.PVisitId);
       
       let response;
-      if (mode === 'edit' && patientId) {
-        console.log('Making PUT request to:', `/outdoor-visit-entry/${patientId}`);
-        response = await axiosInstance.put(`/outdoor-visit-entry/${patientId}`, dataToSubmit);
+      
+      if (mode === 'edit' && (id || formData.PVisitId)) {
+        const visitId = id || formData.PVisitId;
+        response = await axiosInstance.put(`/patient-visits/${visitId}`, visitData);
       } else {
-        console.log('Making POST request to:', '/outdoor-visit-entry');
-        response = await axiosInstance.post('/outdoor-visit-entry', dataToSubmit);
+        response = await axiosInstance.post('/patient-visits', visitData);
       }
       
       if (response.data && response.data.success) {
-        alert(`${mode === 'edit' ? 'Updated' : 'Created'} successfully!`);
+        alert(`Visit ${mode === 'edit' ? 'updated' : 'created'} successfully!`);
         navigate('/table-data');
       } else {
         alert(response.data?.message || 'Operation failed');
@@ -650,54 +642,21 @@ const OutdoorVisitDetail = () => {
                 <label>Age (Years)</label>
                 <input type="number" name="Age" className="form-control" 
                        value={formData.Age} onChange={(e) => {
-                         const years = parseInt(e.target.value) || 0;
-                         const months = parseInt(formData.AgeD) || 0;
-                         const days = parseInt(formData.AgeN) || 0;
-                         
-                         const regDate = new Date(formData.RegistrationDate);
-                         const birthDate = new Date(regDate);
-                         birthDate.setFullYear(birthDate.getFullYear() - years);
-                         birthDate.setMonth(birthDate.getMonth() - months);
-                         birthDate.setDate(birthDate.getDate() - days);
-                         const dobString = birthDate.toISOString().split('T')[0];
-                         
-                         setFormData(prev => ({ ...prev, Age: e.target.value, dob: dobString }));
+                         setFormData(prev => ({ ...prev, Age: e.target.value }));
                        }} />
               </div>
               <div className="col-md-2">
                 <label>Months</label>
                 <input type="number" name="AgeD" className="form-control" 
                        value={formData.AgeD} onChange={(e) => {
-                         const years = parseInt(formData.Age) || 0;
-                         const months = parseInt(e.target.value) || 0;
-                         const days = parseInt(formData.AgeN) || 0;
-                         
-                         const regDate = new Date(formData.RegistrationDate);
-                         const birthDate = new Date(regDate);
-                         birthDate.setFullYear(birthDate.getFullYear() - years);
-                         birthDate.setMonth(birthDate.getMonth() - months);
-                         birthDate.setDate(birthDate.getDate() - days);
-                         const dobString = birthDate.toISOString().split('T')[0];
-                         
-                         setFormData(prev => ({ ...prev, AgeD: e.target.value, dob: dobString }));
+                         setFormData(prev => ({ ...prev, AgeD: e.target.value }));
                        }} />
               </div>
               <div className="col-md-2">
                 <label>Days</label>
                 <input type="number" name="AgeN" className="form-control" 
                        value={formData.AgeN} onChange={(e) => {
-                         const years = parseInt(formData.Age) || 0;
-                         const months = parseInt(formData.AgeD) || 0;
-                         const days = parseInt(e.target.value) || 0;
-                         
-                         const regDate = new Date(formData.RegistrationDate);
-                         const birthDate = new Date(regDate);
-                         birthDate.setFullYear(birthDate.getFullYear() - years);
-                         birthDate.setMonth(birthDate.getMonth() - months);
-                         birthDate.setDate(birthDate.getDate() - days);
-                         const dobString = birthDate.toISOString().split('T')[0];
-                         
-                         setFormData(prev => ({ ...prev, AgeN: e.target.value, dob: dobString }));
+                         setFormData(prev => ({ ...prev, AgeN: e.target.value }));
                        }} />
               </div>
               <div className="col-md-3">
@@ -854,8 +813,8 @@ const OutdoorVisitDetail = () => {
               </div>
               <div className="col-md-2">
                 <label>Professional Charge</label>
-                <input type="number" name="proffCh" className="form-control" 
-                       value={formData.proffCh} onChange={handleChange} />
+                <input type="number" name="Rate" className="form-control" 
+                       value={formData.Rate} onChange={handleChange} />
               </div>
               <div className="col-md-2">
                 <label>Service Charge</label>
@@ -863,14 +822,22 @@ const OutdoorVisitDetail = () => {
                        value={formData.svrCh} onChange={handleChange} />
               </div>
               <div className="col-md-2">
-                <label>Patient Discount (%)</label>
-                <input type="number" name="pDisc" className="form-control" 
-                       value={formData.pDisc} onChange={handleChange} />
+                <label>Professional  Discount (%)</label>
+                <input type="number" name="discp" className="form-control" 
+                       value={formData.discp} onChange={(e) => {
+                         const percent = parseFloat(e.target.value) || 0;
+                         const amount = (parseFloat(formData.Rate) || 0) * percent / 100;
+                         setFormData(prev => ({ ...prev, discp: e.target.value, Discount: amount.toFixed(2) }));
+                       }} />
               </div>
               <div className="col-md-2">
-                <label>Professional Discount</label>
-                <input type="number" name="proffDisc" className="form-control" 
-                       value={formData.proffDisc} onChange={handleChange} />
+                <label>Professional Discount Amount</label>
+                <input type="number" name="Discount" className="form-control" 
+                       value={formData.Discount} onChange={(e) => {
+                         const amount = parseFloat(e.target.value) || 0;
+                         const percent = parseFloat(formData.Rate) > 0 ? (amount / parseFloat(formData.Rate)) * 100 : 0;
+                         setFormData(prev => ({ ...prev, Discount: e.target.value, discp: percent.toFixed(2) }));
+                       }} />
               </div>
               <div className="col-md-2">
                 <label>Service Discount</label>
