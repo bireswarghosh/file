@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import axiosInstance from '../../../../axiosInstance';
 import MasterLayout from '../../../MasterLayout';
 import Breadcrumb from '../../../Breadcrumb';
+import { getPDFGenerator } from '../../../../utils/pdfGenerators';
 
 const DrRectVisitDetail = () => {
   const fromDateRef = useRef();
@@ -13,57 +12,6 @@ const DrRectVisitDetail = () => {
   const [selectedDoctors, setSelectedDoctors] = useState([]);
   const [reportType, setReportType] = useState('All');
   const [loading, setLoading] = useState(false);
-
-  // Sample dynamic data (replace with your actual data fetching logic)
-  const reportData = {
-    title: 'DATE WISE DOCTOR VISIT (ALL_DETAIL)',
-    companyName: 'LORDS DIAGNOSTIC',
-    companyAddress: '13/1, CIRCULAR 2ND BYE LANE',
-    dateRange: {
-      from: '22/Feb/2025', // These could be dynamically set
-      to: '22/Feb/2025',
-    },
-    pageNumber: 'Page 1 of 2', // This might need dynamic calculation for multi-page reports
-    visits: [
-      {
-        doctor: 'Consultant Dr. ABHIJIT MUKHOPADHYAY',
-        category: 'CASH',
-        patients: [
-          { visitNo: 'RRR00450', patientName: 'RDHA RANI GANGULY', profChrg: 450.00, discount: '', totalAmt: 500.00, recAmt: 500.00, entryBy: 'SUSANITA' },
-          { visitNo: 'RRR00460', patientName: 'NASHIA KHATUN', profChrg: 450.00, discount: '', totalAmt: 500.00, recAmt: 500.00, entryBy: 'SUSANITA' },
-          { visitNo: 'RRR00460', patientName: 'BARNALI BHATTERJEE', profChrg: 450.00, discount: '', totalAmt: 500.00, recAmt: 500.00, entryBy: 'SANJAY ST.' },
-        ],
-        paymodeTotal: 1350.00,
-        doctorTotal: 1350.00,
-      },
-      {
-        doctor: 'Consultant Dr. MD PAYEL CHAKRABORTY',
-        category: 'CASH',
-        patients: [
-          { visitNo: 'RRR00460', patientName: 'NIBHA DAS', profChrg: 200.00, discount: '', totalAmt: 300.00, recAmt: 300.00, entryBy: 'SONALI BANERJI' },
-          { visitNo: 'RRR00460', patientName: 'ARIA SINGH', profChrg: 200.00, discount: '', totalAmt: 300.00, recAmt: 300.00, entryBy: 'SONALI BANERJI' },
-          { visitNo: 'RRR00460', patientName: 'ULY DAS', profChrg: 200.00, discount: '', totalAmt: 300.00, recAmt: 300.00, entryBy: 'SONALI BANERJI' },
-        ],
-        paymodeTotal: 600.00,
-        doctorTotal: 600.00,
-      },
-      {
-        doctor: 'Consultant Dr. RAJ NARAYAN ROY',
-        category: 'CASH',
-        patients: [
-          { visitNo: 'RRR00460', patientName: 'SAMIR NASKAR', profChrg: 600.00, discount: '', totalAmt: 650.00, recAmt: 650.00, entryBy: 'SANJAY ST.' },
-          { visitNo: 'RRR00460', patientName: 'SOMA JATI', profChrg: 600.00, discount: '', totalAmt: 650.00, recAmt: 650.00, entryBy: 'SANJAY ST.' },
-          { visitNo: 'RRR00460', patientName: 'RABIN GHORUI', profChrg: 600.00, discount: '', totalAmt: 650.00, recAmt: 650.00, entryBy: 'SANJAY ST.' },
-          { visitNo: 'RRR00460', patientName: 'REHANA SULTANA', profChrg: 600.00, discount: '', totalAmt: 650.00, recAmt: 650.00, entryBy: 'SANJAY ST.' },
-        ],
-        paymodeTotal: 2400.00,
-        doctorTotal: 2400.00,
-      },
-    ],
-    dayTotal: 4350.00,
-    dayDiscount: 0.00,
-    dayGrandTotal: 5000.00,
-  };
 
   const doctorList = [
     'Dr. Emily Carter', 'Dr. Benjamin Lee', 'Dr. Olivia Rodriguez',
@@ -81,14 +29,25 @@ const DrRectVisitDetail = () => {
     });
   };
 
+  // Convert dd/mm/yyyy to yyyy-mm-dd for API
+  const convertDateForAPI = (dateString) => {
+    if (!dateString) return '';
+    const [day, month, year] = dateString.split('/');
+    return `${year}-${month}-${day}`;
+  };
+
   const handlePrintReport = async () => {
-    const fromDate = fromDateRef.current?.value;
-    const toDate = toDateRef.current?.value;
+    const fromDateInput = fromDateRef.current?.value;
+    const toDateInput = toDateRef.current?.value;
     
-    if (!fromDate || !toDate) {
+    if (!fromDateInput || !toDateInput) {
       alert('Please select both From and To dates');
       return;
     }
+    
+    // Convert dd/mm/yyyy to yyyy-mm-dd for API
+    const fromDate = convertDateForAPI(fromDateInput);
+    const toDate = convertDateForAPI(toDateInput);
     
     if (viewOption !== 'UserWise' || doctorSelect !== 'allDoctors' || reportType !== 'All') {
       alert('Please select: View Options = UserWise, Doctor Selection = All Doctors, Report Type = All');
@@ -107,7 +66,9 @@ const DrRectVisitDetail = () => {
         return;
       }
       
-      generatePDFWithData(apiData, fromDate, toDate);
+      const pdfGenerator = getPDFGenerator(viewOption, doctorSelect, reportType);
+      const doc = pdfGenerator(apiData, fromDateInput, toDateInput);
+      window.open(doc.output('bloburl'), '_blank');
     } catch (error) {
       console.error('Error fetching data:', error);
       alert('Error fetching data from server');
@@ -115,164 +76,38 @@ const DrRectVisitDetail = () => {
       setLoading(false);
     }
   };
-  
-  const generatePDFWithData = (data, fromDate, toDate) => {
-    const doc = new jsPDF("p", "mm", "a4");
-    const pageWidth = doc.internal.pageSize.getWidth();
-
-    // ===== Clinic Header =====
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("LORDS DIAGNOSTIC", pageWidth / 2, 12, { align: "center" });
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text("13/3, CIRCULAR 2ND BYE LANE,", pageWidth / 2, 17, { align: "center" });
-
-    // ===== Report Title =====
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(200, 0, 0);
-    doc.setFontSize(11);
-    doc.text("DATE WISE DOCTOR WISE VISIT (ALL_DETAIL)", pageWidth / 2, 25, { align: "center" });
-
-    // ===== Date Range =====
-    doc.setFontSize(9);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`Date : ${fromDate}`, 15, 32);
-    doc.text(`To : ${toDate}`, 60, 32);
-    doc.text(`Page 1 of 1`, pageWidth - 30, 32);
-
-    // ===== Table Header =====
-    const head = [
-      ["Visit No", "Patient Name", "Cancel", "Booking", "Prof.Chrg", "Discount", "Total Amt.", "recamt", "Entry By"],
-    ];
-
-    autoTable(doc, {
-      head: head,
-      body: [],
-      theme: "plain",
-      startY: 38,
-      headStyles: {
-        fillColor: [0, 128, 0],
-        textColor: [255, 255, 255],
-        fontStyle: "bold",
-        halign: "center",
-      },
-      styles: { fontSize: 9, halign: "center", cellPadding: 2 },
-      margin: { left: 15, right: 15 },
-      tableWidth: "auto",
-    });
-
-    let currentY = doc.lastAutoTable.finalY + 5;
-    
-    // Group data by doctor
-    const groupedByDoctor = data.reduce((acc, visit) => {
-      const doctorName = visit.DoctorName || 'Unknown Doctor';
-      if (!acc[doctorName]) {
-        acc[doctorName] = [];
-      }
-      acc[doctorName].push(visit);
-      return acc;
-    }, {});
-    
-    let totalProfChrg = 0;
-    let totalDiscount = 0;
-    let totalAmount = 0;
-    let totalRecAmt = 0;
-    
-    Object.entries(groupedByDoctor).forEach(([doctorName, visits]) => {
-      // ===== Visit Date Row =====
-      doc.setTextColor(128, 0, 128);
-      doc.setFontSize(9);
-      doc.text(`Visit Date : ${fromDate}`, 15, currentY);
-      currentY += 6;
-
-      // ===== Consultant Row =====
-      doc.setTextColor(0, 0, 0);
-      doc.setFont("helvetica", "bold");
-      doc.text(`Consultant ${doctorName}`, 15, currentY);
-      currentY += 6;
-
-      // ===== CASH Row =====
-      doc.text("CASH", 15, currentY);
-      currentY += 4;
-
-      // ===== Patient Data Table =====
-      const patientData = visits.map(visit => [
-        visit.RegistrationNo || '',
-        visit.PatientName || '',
-        visit.CancelYN || '',
-        visit.BookingYN || '',
-        (visit.Rate || 0).toFixed(2),
-        (visit.Discount || 0).toFixed(2),
-        (visit.TotAmount || 0).toFixed(2),
-        (visit.RecAmt || 0).toFixed(2),
-        visit.UserId || ''
-      ]);
-
-      autoTable(doc, {
-        head: [],
-        body: patientData,
-        startY: currentY,
-        theme: "plain",
-        styles: { fontSize: 9, halign: "center", cellPadding: 2 },
-        margin: { left: 15, right: 15 },
-        tableWidth: "auto",
-      });
-      
-      // Calculate totals for this doctor
-      const doctorProfChrg = visits.reduce((sum, v) => sum + (v.Rate || 0), 0);
-      const doctorDiscount = visits.reduce((sum, v) => sum + (v.Discount || 0), 0);
-      const doctorTotalAmt = visits.reduce((sum, v) => sum + (v.TotAmount || 0), 0);
-      const doctorRecAmt = visits.reduce((sum, v) => sum + (v.RecAmt || 0), 0);
-      
-      totalProfChrg += doctorProfChrg;
-      totalDiscount += doctorDiscount;
-      totalAmount += doctorTotalAmt;
-      totalRecAmt += doctorRecAmt;
-
-      // ===== Paymode Total Row =====
-      autoTable(doc, {
-        body: [[{ content: `Paymode Total : ${doctorProfChrg.toFixed(2)} ${doctorDiscount.toFixed(2)} ${doctorTotalAmt.toFixed(2)} ${doctorRecAmt.toFixed(2)}`, styles: { fontStyle: "bold", halign: "left" } }]],
-        theme: "plain",
-        startY: doc.lastAutoTable.finalY + 3,
-        styles: { fontSize: 9, cellPadding: 3 },
-        bodyStyles: { lineColor: [255, 0, 0], lineWidth: 0.6 },
-        margin: { left: 15, right: 15 },
-        tableWidth: "auto",
-      });
-
-      // ===== Doctor Total Row =====
-      autoTable(doc, {
-        body: [[{ content: `Doctor Total : ${doctorProfChrg.toFixed(2)} ${doctorDiscount.toFixed(2)} ${doctorTotalAmt.toFixed(2)} ${doctorRecAmt.toFixed(2)}`, styles: { fontStyle: "bold", halign: "left" } }]],
-        theme: "plain",
-        startY: doc.lastAutoTable.finalY + 2,
-        styles: { fontSize: 9, cellPadding: 3 },
-        bodyStyles: { lineColor: [255, 0, 0], lineWidth: 0.6 },
-        margin: { left: 15, right: 15 },
-        tableWidth: "auto",
-      });
-      
-      currentY = doc.lastAutoTable.finalY + 10;
-    });
-    
-    // ===== Grand Total =====
-    autoTable(doc, {
-      body: [[{ content: `Grand Total : ${totalProfChrg.toFixed(2)} ${totalDiscount.toFixed(2)} ${totalAmount.toFixed(2)} ${totalRecAmt.toFixed(2)}`, styles: { fontStyle: "bold", halign: "left", fontSize: 10 } }]],
-      theme: "plain",
-      startY: currentY,
-      styles: { fontSize: 10, cellPadding: 4 },
-      bodyStyles: { lineColor: [0, 0, 255], lineWidth: 1 },
-      margin: { left: 15, right: 15 },
-      tableWidth: "auto",
-    });
-
-    // ===== Open PDF in new tab =====
-    window.open(doc.output('bloburl'), '_blank');
-  };
 
   return (
     <MasterLayout>
+      <style>
+        {`
+          input[type="date"] {
+            position: relative;
+          }
+          input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            right: 0;
+            color: transparent;
+            background: transparent;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+          }
+          input[type="date"]:before {
+            content: attr(placeholder);
+            color: #999;
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+          }
+          input[type="date"]:focus:before,
+          input[type="date"]:valid:before {
+            display: none;
+          }
+        `}
+      </style>
       <Breadcrumb title="Doctor Rect Visit Detail" />
 
       <div className="container my-5">
@@ -281,32 +116,82 @@ const DrRectVisitDetail = () => {
             {/* Date Range */}
             <div className="row g-3 mb-4 align-items-center">
               <div className="col-md-2 text-md-end">
-                <label htmlFor="fromDate" className="form-label fw-semibold">Date Range:</label>
+                <label className="form-label fw-semibold">Date Range:</label>
               </div>
               <div className="col-md-4">
-                <div className="form-floating">
+                <div className="input-group">
                   <input 
-                    type="date" 
+                    type="text" 
                     className="form-control" 
                     id="fromDate" 
-                    placeholder="Date From" 
                     ref={fromDateRef}
+                    placeholder="dd/mm/yyyy"
+                    pattern="\d{2}/\d{2}/\d{4}"
+                    maxLength="10"
+                    onInput={(e) => {
+                      let value = e.target.value.replace(/[^0-9]/g, '');
+                      if (value.length >= 2 && value.length < 4) {
+                        value = value.substring(0,2) + '/' + value.substring(2);
+                      } else if (value.length >= 4) {
+                        value = value.substring(0,2) + '/' + value.substring(2,4) + '/' + value.substring(4,8);
+                      }
+                      e.target.value = value;
+                    }}
                   />
-                  <label htmlFor="fromDate">From</label>
+                  <span className="input-group-text" style={{cursor: 'pointer'}} onClick={() => document.getElementById('hiddenFromDate').showPicker()}>
+                    <i className="fas fa-calendar-alt"></i>
+                  </span>
+                  <input 
+                    type="date" 
+                    id="hiddenFromDate"
+                    style={{position: 'absolute', left: '-9999px', opacity: 0}}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const [year, month, day] = e.target.value.split('-');
+                        fromDateRef.current.value = `${day}/${month}/${year}`;
+                      }
+                    }}
+                  />
                 </div>
+                <small className="text-muted">From Date (dd/mm/yyyy)</small>
               </div>
               <div className="col-md-1 text-center fw-semibold d-none d-md-block">- To -</div>
               <div className="col-md-4">
-                <div className="form-floating">
+                <div className="input-group">
                   <input 
-                    type="date" 
+                    type="text" 
                     className="form-control" 
                     id="toDate" 
-                    placeholder="Date To" 
                     ref={toDateRef}
+                    placeholder="dd/mm/yyyy"
+                    pattern="\d{2}/\d{2}/\d{4}"
+                    maxLength="10"
+                    onInput={(e) => {
+                      let value = e.target.value.replace(/[^0-9]/g, '');
+                      if (value.length >= 2 && value.length < 4) {
+                        value = value.substring(0,2) + '/' + value.substring(2);
+                      } else if (value.length >= 4) {
+                        value = value.substring(0,2) + '/' + value.substring(2,4) + '/' + value.substring(4,8);
+                      }
+                      e.target.value = value;
+                    }}
                   />
-                  <label htmlFor="toDate">To</label>
+                  <span className="input-group-text" style={{cursor: 'pointer'}} onClick={() => document.getElementById('hiddenToDate').showPicker()}>
+                    <i className="fas fa-calendar-alt"></i>
+                  </span>
+                  <input 
+                    type="date" 
+                    id="hiddenToDate"
+                    style={{position: 'absolute', left: '-9999px', opacity: 0}}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const [year, month, day] = e.target.value.split('-');
+                        toDateRef.current.value = `${day}/${month}/${year}`;
+                      }
+                    }}
+                  />
                 </div>
+                <small className="text-muted">To Date (dd/mm/yyyy)</small>
               </div>
             </div>
 
