@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Paper, IconButton, TextField, Button, Box, Card, CardContent, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
-import { Edit, Delete, Visibility, Search } from '@mui/icons-material';
+import { Edit, Delete, Visibility, Search, PictureAsPdf } from '@mui/icons-material';
 import MasterLayout from '../../../MasterLayout';
 import Breadcrumb from '../../../Breadcrumb';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../../axiosInstance';
+import jsPDF from 'jspdf';
 
 const Visit_list = () => {
   const [visits, setVisits] = useState([]);
@@ -129,6 +130,152 @@ const Visit_list = () => {
     }
   };
 
+  const generatePDF = (patient) => {
+    const doc = new jsPDF();
+    
+    // Red logo box with white text
+    doc.setFillColor(220, 53, 69);
+    doc.rect(15, 15, 30, 30, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('L', 22, 28);
+    doc.text('H', 22, 35);
+    doc.text('C', 22, 42);
+    
+    // Main header
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('LORDS HEALTH CARE', 105, 25, { align: 'center' });
+    
+    // Address details
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('13/3, Circular 2nd Bye Lane, Kona Expressway,', 105, 32, { align: 'center' });
+    doc.text('(Near Jumanabala Balika Vidyalaya) Shibpur, Howrah - 711 102, W.B.', 105, 37, { align: 'center' });
+    doc.text('Phone No.: 8272904444 HELPLINE - 7003378414,Toll Free No:-1800-309-0895', 105, 42, { align: 'center' });
+    doc.text('E-mail: patientdesk@lordshealthcare.org, Website: www.lordshealthcare.org', 105, 47, { align: 'center' });
+
+    // Barcode area
+    doc.setLineWidth(1);
+    doc.rect(165, 15, 30, 25);
+    // Vertical barcode lines
+    for(let i = 0; i < 20; i++) {
+      if(i % 2 === 0) doc.line(167 + i, 17, 167 + i, 38);
+    }
+    doc.setFontSize(8);
+    doc.text('S-' + patient.RegistrationId, 180, 44, { align: 'center' });
+
+    // ADVANCE BOOKING title
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ADVANCE BOOKING', 105, 60, { align: 'center' });
+
+    // MONEY RECEIPT header with Serial No
+    doc.setFontSize(14);
+    doc.setTextColor(255, 0, 0);
+    doc.setFont('helvetica', 'bold');
+    doc.text('MONEY RECEIPT', 20, 75);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Serial No : 1', 150, 75);
+
+    // Main information table
+    const startY = 85;
+    doc.setLineWidth(0.5);
+    doc.setTextColor(0, 0, 0);
+    
+    // Registration details box
+    doc.rect(15, startY, 180, 25);
+    doc.line(15, startY + 12, 195, startY + 12);
+    doc.line(100, startY, 100, startY + 25);
+    doc.line(140, startY, 140, startY + 25);
+    
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Registration ID : S-${patient.RegistrationId}`, 17, startY + 8);
+    doc.text(`Registration Date : ${patient.RegDate}`, 17, startY + 20);
+    doc.text(`Booking Time : ${patient.RegTime || '08:20 AM'}`, 17, startY + 32);
+    
+    doc.text(`Visit ID :`, 102, startY + 8);
+    doc.text(`RRR00351`, 102, startY + 20);
+    
+    doc.text(`Visit Date : ${patient.RegDate}`, 142, startY + 8);
+    doc.text(`Visit Time : ${patient.RegTime || '8:20:00 AM'}`, 142, startY + 20);
+
+    // Patient information box - made taller to fit consultant info
+    const patientY = startY + 25;
+    doc.rect(15, patientY, 180, 55);
+    doc.line(15, patientY + 20, 195, patientY + 20);
+    doc.line(15, patientY + 40, 195, patientY + 40);
+    doc.line(140, patientY + 20, 140, patientY + 55);
+    
+    doc.text(`Patient Name : ${patient.PatientName}`, 17, patientY + 12);
+    doc.text(`Age : ${patient.Age || '57'} Y    Sex : ${patient.Sex || 'Female'}`, 142, patientY + 8);
+    doc.text(`Phone No : ${patient.PhoneNo}`, 142, patientY + 16);
+    
+    doc.text(`Address : ${patient.Add1 || 'HOWRAH, ,'}`, 17, patientY + 32);
+    doc.text(`SERVER2    0    Cash    N`, 142, patientY + 32);
+    
+    // Consultant and Department in separate row with proper spacing
+    doc.text(`CONSULTANT : Dr. ${patient.DoctorName || 'ABHRA MUKHOPADHYAY'}`, 17, patientY + 52);
+    doc.text(`Department : ${patient.SpecialityName || 'GENERAL MEDICINE'}`, 142, patientY + 52);
+
+    // Services table header - adjusted position
+    const servicesY = patientY + 55;
+    doc.rect(15, servicesY, 180, 12);
+    doc.line(150, servicesY, 150, servicesY + 12);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Particulars / Description', 17, servicesY + 8);
+    doc.text('Amount In Rs.', 152, servicesY + 8);
+    
+    // Service items
+    let currentY = servicesY + 12;
+    doc.setFont('helvetica', 'normal');
+    
+    // Service Charge
+    doc.rect(15, currentY, 180, 12);
+    doc.line(150, currentY, 150, currentY + 12);
+    doc.text('Service Charge', 17, currentY + 8);
+    doc.text('100.00', 185, currentY + 8, { align: 'right' });
+    currentY += 12;
+    
+    // Professional Charge
+    doc.rect(15, currentY, 180, 12);
+    doc.line(150, currentY, 150, currentY + 12);
+    doc.text('CONSULTATION - Professional Charge', 17, currentY + 8);
+    doc.text('500.00', 185, currentY + 8, { align: 'right' });
+    currentY += 12;
+    
+    // Thank you message
+    doc.rect(15, currentY, 180, 18);
+    doc.line(150, currentY, 150, currentY + 18);
+    doc.text(`Received With Thanks For CONSULTATION Charges From ${patient.PatientName}.`, 17, currentY + 12);
+    doc.text('600.00', 185, currentY + 12, { align: 'right' });
+    currentY += 18;
+    
+    // Total amount in words
+    doc.rect(15, currentY, 180, 18);
+    doc.line(150, currentY, 150, currentY + 18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PAID : Rupees six hundred & zero paise only', 17, currentY + 12);
+    doc.text('600.00', 185, currentY + 12, { align: 'right' });
+    currentY += 18;
+
+    // Footer signature
+    doc.setFont('helvetica', 'normal');
+    doc.text('Received By : SANJAY ST.', 17, currentY + 15);
+
+    // Save PDF with patient name
+    const fileName = `MoneyReceipt_${patient.PatientName.replace(/\s+/g, '_')}_${patient.RegistrationId.replace('/', '-')}.pdf`;
+    doc.save(fileName);
+    alert('Professional Money Receipt PDF generated successfully!');
+  };
+
+
+
   const handleDelete = async (patient) => {
     if (window.confirm(`Are you sure you want to delete visit for ${patient.PatientName}?`)) {
       try {
@@ -148,7 +295,7 @@ const Visit_list = () => {
      {
       field: 'actions',
       headerName: 'Actions',
-      width: 150,
+      width: 200,
       sortable: false,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -167,6 +314,14 @@ const Visit_list = () => {
             title="Edit Patient"
           >
             <Edit fontSize="small" />
+          </IconButton>
+          <IconButton 
+            size="small" 
+            sx={{ bgcolor: '#fff3e0', color: '#f57c00' }}
+            onClick={() => generatePDF(params.row)}
+            title="Generate Money Receipt PDF"
+          >
+            <PictureAsPdf fontSize="small" />
           </IconButton>
           <IconButton 
             size="small" 

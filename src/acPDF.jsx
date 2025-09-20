@@ -3,113 +3,118 @@ import autoTable from "jspdf-autotable";
 
 export const generatePDF = () => {
   const doc = new jsPDF("p", "mm", "a4");
+  const margin = { top: 15, left: 15, right: 15 };
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  // ===== Clinic Header =====
+  // Title Header
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text("LORDS DIAGNOSTIC", pageWidth / 2, 12, { align: "center" });
+  doc.setFontSize(14);
+  doc.text("LORDS HEALTH CARE", pageWidth / 2, margin.top, { align: "center" });
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text("13/3, CIRCULAR 2ND BYE LANE,", pageWidth / 2, 17, { align: "center" });
+  doc.text(
+    "13/3, Circular 2nd Bye Lane, Kona Expressway, (Near Jumanabala Balika Vidyalaya)\nShibpur, Howrah - 711 102, W.B.",
+    pageWidth / 2,
+    margin.top + 6,
+    { align: "center" }
+  );
+  doc.text(
+    "Phone No.: 8272904444 HELPLINE - 7003378414 Toll Free: 1800-309-0895\nE-mail: patientdesk@lordshealthcare.org | Website: www.lordshealthcare.org",
+    pageWidth / 2,
+    margin.top + 16,
+    { align: "center" }
+  );
 
-  // ===== Report Title =====
+  // Main Title
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(200, 0, 0);
-  doc.setFontSize(11);
-  doc.text("DATE WISE DOCTOR WISE VISIT (ALL_DETAIL)", pageWidth / 2, 25, { align: "center" });
+  doc.setFontSize(13);
+  doc.text("ADVANCE BOOKING - MONEY RECEIPT", pageWidth / 2, margin.top + 28, {
+    align: "center",
+  });
 
-  // ===== Date Range (next line) =====
-  doc.setFontSize(9);
-  doc.setTextColor(0, 0, 0);
-  doc.text("Date : 01/Sep/2023", 15, 32);
-  doc.text("To : 24/Sep/2023", 60, 32);
-  doc.text("Page 1 of 22", pageWidth - 30, 32);
-
-  // ===== Table Header =====
-  const head = [
-    ["Visit No", "Patient Name", "Cancel", "Booking", "Prof.Chrg", "Discount", "Total Amt.", "recamt", "Entry By"],
+  // Patient & Booking Details (with borders)
+  let details = [
+    ["Serial No :", "1", "Registration Date :", "01/09/2023"],
+    ["Visit Date :", "01/09/2023", "Visit ID :", "RRR00351"],
+    ["Registration ID :", "S-004018/23-24", "Visit Time :", "08:20 AM"],
+    ["Booking Time :", "08:20 AM", "Sex :", "Female"],
+    ["Age :", "Y57", "Patient Name :", "MOUSUMI SARKAR"],
+    ["Phone No :", "9804600046", "Address :", "HOWRAH"],
   ];
 
   autoTable(doc, {
-    head: head,
-    body: [],
-    theme: "plain",
-    startY: 38,
-    headStyles: {
-      fillColor: [0, 128, 0],   // medical green
-      textColor: [255, 255, 255],
-      fontStyle: "bold",
-      halign: "center",
+    startY: margin.top + 34,
+    body: details,
+    theme: "grid", // 🔹 enable borders
+    styles: { fontSize: 9, cellPadding: 2, lineWidth: 0.2 },
+    columnStyles: {
+      0: { fontStyle: "bold", cellWidth: 35 },
+      2: { fontStyle: "bold", cellWidth: 40 },
     },
-    styles: { fontSize: 9, halign: "center", cellPadding: 2 },
-    margin: { left: 15, right: 15 },
-    tableWidth: "auto",
   });
 
-  let currentY = doc.lastAutoTable.finalY + 5;
+  // Doctor & Department (with border)
+  autoTable(doc, {
+    startY: doc.lastAutoTable.finalY + 4,
+    body: [["CONSULTANT :", "MD. SALAHUDDIN", "Department :", "ORTHOPAEDIC"]],
+    theme: "grid", // 🔹 enable borders
+    styles: { fontSize: 9, cellPadding: 2, lineWidth: 0.2 },
+    columnStyles: {
+      0: { fontStyle: "bold", cellWidth: 35 },
+      2: { fontStyle: "bold", cellWidth: 30 },
+    },
+  });
 
-  // ===== Visit Date Row =====
-  doc.setTextColor(128, 0, 128); // purple
-  doc.setFontSize(9);
-  doc.text("Visit Date : 01/09/2023", 15, currentY);
-  currentY += 6;
+  // Charges Table (with header highlight + borders)
+  autoTable(doc, {
+    startY: doc.lastAutoTable.finalY + 8,
+    head: [["Amount (Rs.)", "Particulars / Description"]],
+    body: [
+      ["100.00", "Service Charge"],
+      ["500.00", "CONSULTATION - Professional Charge"],
+    ],
+    theme: "grid", // 🔹 visible borders
+    styles: { fontSize: 10, cellPadding: 3, lineWidth: 0.3 },
+    headStyles: {
+      fillColor: [200, 200, 200],
+      textColor: [0, 0, 0],
+      fontStyle: "bold",
+    },
+  });
 
-  // ===== Consultant Row =====
-  doc.setTextColor(0, 0, 0);
+  // Highlight Total in Red Box
+  let y = doc.lastAutoTable.finalY + 6;
+  doc.setDrawColor(255, 0, 0);
+  doc.setLineWidth(0.5);
+  doc.rect(margin.left, y, pageWidth - margin.left * 2, 10);
   doc.setFont("helvetica", "bold");
-  doc.text("Consultant Dr. MD.SALAHUDDIN", 15, currentY);
-  currentY += 6;
-
-  // ===== CASH Row =====
-  doc.text("CASH", 15, currentY);
-  currentY += 4;
-
-  // ===== Patient Data Table =====
-  const patientData = [
-    ["RRR00351", "MOUSUMI SARKAR", "", "", "500.00", "", "600.00", "600.00", "SANJAY ST."],
-  ];
-
-  autoTable(doc, {
-    head: [],
-    body: patientData,
-    startY: currentY,
-    theme: "plain",
-    styles: { fontSize: 9, halign: "center", cellPadding: 2 },
-    margin: { left: 15, right: 15 },
-    tableWidth: "auto",
+  doc.text("TOTAL : 600.00", pageWidth - margin.right - 10, y + 7, {
+    align: "right",
   });
 
- // ===== Paymode Total Row (Red Box, no column division) =====
-  autoTable(doc, {
-    body: [[{ content:                 "Paymode Total :          500.00            600.00            600.00", styles: { fontStyle: "bold", halign: "left" } }]],
-    theme: "plain",
-    startY: doc.lastAutoTable.finalY + 3,
-    styles: { fontSize: 9, cellPadding: 3 },
-    bodyStyles: { lineColor: [255, 0, 0], lineWidth: 0.6 },
-    margin: { left: 15, right: 15 },
-    tableWidth: "auto",
-  });
+  // Footer Section
+  y += 18;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text(
+    "Received With Thanks For CONSULTATION Charges From MOUSUMI SARKAR",
+    margin.left,
+    y
+  );
+  doc.text("Received By : SANJAY ST.", margin.left, y + 6);
 
-  // ===== Doctor Total Row (Red Box, no column division) =====
-  autoTable(doc, {
-    body: [[{ content:                 "Doctor Total :   500.00     0.00           600.00          600.00", styles: { fontStyle: "bold", halign: "left" } }]],
-    theme: "plain",
-    startY: doc.lastAutoTable.finalY + 2,
-    styles: { fontSize: 9, cellPadding: 3 },
-    bodyStyles: { lineColor: [255, 0, 0], lineWidth: 0.6 },
-    margin: { left: 15, right: 15 },
-    tableWidth: "auto",
-  });
-
-   
-
-  // ===== Save PDF =====
-  doc.save("DoctorWiseVisitReport.pdf");
-};
+  y += 14;
+  doc.setFont("helvetica", "bold");
+  doc.text("PAID : Rupees Six Hundred & Zero Paise Only (600.00)", margin.left, y);
 
  
+
+
+  // Save PDF
+  doc.save("report.pdf");
+};
+
 const AcPDFDownload = () => {
   return (
     <button onClick={generatePDF} className="btn btn-primary">
