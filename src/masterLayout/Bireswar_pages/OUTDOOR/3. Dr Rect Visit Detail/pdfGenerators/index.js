@@ -3,6 +3,7 @@ import { generateUserWiseAllDoctorsPDF } from './UserWise_AllDoctors_all';
 import { generateUserWiseAllDoctorsSummaryPDF } from './UserWise_AllDoctors_summary';
 import { generateUserWiseAllDoctorsOnlyServiceChPDF } from './UserWise_AllDoctors_onlyServiceCh';
 import { generateUserWiseAllDoctorsDoctorSummaryPDF } from './UserWise_AllDoctors_doctorSummary';
+import { generateUserWiseAllDoctorsVisitIdWisePDF } from './UserWise_AllDoctors_visitIdWise';
 
 // PDF Generator mapping based on View Options and Doctor Selection
 export const getPDFGenerator = (viewOption, doctorSelect, reportType) => {
@@ -13,6 +14,7 @@ export const getPDFGenerator = (viewOption, doctorSelect, reportType) => {
     'UserWise_allDoctors_Only Doctor Ch.': generateUserWiseAllDoctorsSummaryPDF,
     'UserWise_allDoctors_Only Service Ch.': generateUserWiseAllDoctorsOnlyServiceChPDF,
     'UserWise_allDoctors_Doctor\'s Ch. (Summary)': generateUserWiseAllDoctorsDoctorSummaryPDF,
+    'UserWise_allDoctors_Visit ID Wise': generateUserWiseAllDoctorsVisitIdWisePDF,
     // Add more generators here as needed
     // 'DoctorWise_allDoctors_All': generateDoctorWiseAllDoctorsPDF,
     // 'UserWise_selectiveDoctors_All': generateUserWiseSelectiveDoctorsPDF,
