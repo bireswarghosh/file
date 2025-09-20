@@ -1,5 +1,6 @@
 // PDF Generator Index - Import all PDF formats
-import { generateUserWiseAllDoctorsPDF } from './UserWise_AllDoctors';
+import { generateUserWiseAllDoctorsPDF } from './UserWise_AllDoctors_all';
+import { generateUserWiseAllDoctorsSummaryPDF } from './UserWise_AllDoctors_summary';
 
 // PDF Generator mapping based on View Options and Doctor Selection
 export const getPDFGenerator = (viewOption, doctorSelect, reportType) => {
@@ -7,6 +8,7 @@ export const getPDFGenerator = (viewOption, doctorSelect, reportType) => {
   
   const generators = {
     'UserWise_allDoctors_All': generateUserWiseAllDoctorsPDF,
+    'UserWise_allDoctors_Doctor\'s Ch. (Summary)': generateUserWiseAllDoctorsSummaryPDF,
     // Add more generators here as needed
     // 'DoctorWise_allDoctors_All': generateDoctorWiseAllDoctorsPDF,
     // 'UserWise_selectiveDoctors_All': generateUserWiseSelectiveDoctorsPDF,

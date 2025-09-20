@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import axiosInstance from '../../../../axiosInstance';
 import MasterLayout from '../../../MasterLayout';
 import Breadcrumb from '../../../Breadcrumb';
-import { getPDFGenerator } from '../../../../utils/pdfGenerators';
+import { getPDFGenerator } from './pdfGenerators';
 
 const DrRectVisitDetail = () => {
   const fromDateRef = useRef();
@@ -49,8 +49,8 @@ const DrRectVisitDetail = () => {
     const fromDate = convertDateForAPI(fromDateInput);
     const toDate = convertDateForAPI(toDateInput);
     
-    if (viewOption !== 'UserWise' || doctorSelect !== 'allDoctors' || reportType !== 'All') {
-      alert('Please select: View Options = UserWise, Doctor Selection = All Doctors, Report Type = All');
+    if (viewOption !== 'UserWise' || doctorSelect !== 'allDoctors' || (reportType !== 'All' && reportType !== "Doctor's Ch. (Summary)")) {
+      alert('Please select: View Options = UserWise, Doctor Selection = All Doctors, Report Type = All or Doctor\'s Ch. (Summary)');
       return;
     }
     
