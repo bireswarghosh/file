@@ -57,7 +57,7 @@ const DrRectVisitDetail = () => {
     setLoading(true);
     
     try {
-      const response = await axiosInstance.get(`/patient-visits/date-range?fromDate=${fromDate}&toDate=${toDate}`);
+      const response = await axiosInstance.get(`/patient-visits-enhanced/date-range?fromDate=${fromDate}&toDate=${toDate}`);
       const apiData = response.data.data;
       
       if (!apiData || apiData.length === 0) {

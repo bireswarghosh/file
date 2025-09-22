@@ -8,15 +8,9 @@ export const generateUserWiseAllDoctorsOnlyServiceChPDF = (data, fromDate, toDat
   let currentPage = 1;
   let totalPages = 1;
   
-  // User ID to name mapping
-  const getUserName = (userId) => {
-    const userMap = {
-      '1': 'admin',
-      '42': 'SANJAY ST.',
-      '39': 'MADHU MISH',
-      '43': 'LABONI'
-    };
-    return userMap[userId] || userId || '';
+  // Get user name from API response
+  const getUserName = (visit) => {
+    return visit.UserName || visit.UserId || '';
   };
   
   const addHeader = (pageNum) => {
@@ -104,7 +98,7 @@ export const generateUserWiseAllDoctorsOnlyServiceChPDF = (data, fromDate, toDat
       visit.PatientName || '',
       (visit.ServiceCh || 0).toFixed(2),
       (visit.TotAmount || 0).toFixed(2),
-      getUserName(visit.UserId)
+      getUserName(visit)
     ]);
     
     autoTable(doc, {

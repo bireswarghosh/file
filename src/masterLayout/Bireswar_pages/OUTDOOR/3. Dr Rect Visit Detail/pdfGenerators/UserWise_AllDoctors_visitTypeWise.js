@@ -8,23 +8,12 @@ export const generateUserWiseAllDoctorsVisitTypeWisePDF = (data, fromDate, toDat
   let currentPage = 1;
   let totalPages = 1;
   
-  const getUserName = (userId) => {
-    const userMap = {
-      '1': 'admin',
-      '42': 'SANJAY ST.',
-      '39': 'MADHU MISH',
-      '43': 'LABONI'
-    };
-    return userMap[userId] || userId || '';
+  const getUserName = (visit) => {
+    return visit.UserName || visit.UserId || '';
   };
   
-  const getVisitTypeName = (visitTypeId) => {
-    const visitTypeMap = {
-      '1': 'CONSULTATION',
-      '2': 'DIAGNOSIS',
-      '3': 'REPORTING'
-    };
-    return visitTypeMap[visitTypeId] || visitTypeId || 'UNKNOWN';
+  const getVisitTypeName = (visit) => {
+    return visit.VisitTypeName || visit.VisitTypeId || 'UNKNOWN';
   };
   
   const addHeader = (pageNum) => {
@@ -79,7 +68,7 @@ export const generateUserWiseAllDoctorsVisitTypeWisePDF = (data, fromDate, toDat
   
   // Group data by visit type
   const groupedData = data.reduce((acc, visit) => {
-    const visitType = getVisitTypeName(visit.VisitType);
+    const visitType = getVisitTypeName(visit);
     if (!acc[visitType]) {
       acc[visitType] = [];
     }
@@ -135,7 +124,7 @@ export const generateUserWiseAllDoctorsVisitTypeWisePDF = (data, fromDate, toDat
         advAmt.toFixed(2),
         discount.toFixed(2),
         amount.toFixed(2),
-        getUserName(visit.UserId)
+        getUserName(visit)
       ];
     });
     
