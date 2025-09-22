@@ -8,26 +8,37 @@ const DrRectVisitDetail = () => {
   const fromDateRef = useRef();
   const toDateRef = useRef();
   const [viewOption, setViewOption] = useState('UserWise');
-  const [doctorSelect, setDoctorSelect] = useState('allDoctors');
-  const [selectedDoctors, setSelectedDoctors] = useState([]);
+
   const [reportType, setReportType] = useState('All');
   const [loading, setLoading] = useState(false);
+  const [entryBySelect, setEntryBySelect] = useState('allUsers');
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [userList, setUserList] = useState([]);
 
-  const doctorList = [
-    'Dr. Emily Carter', 'Dr. Benjamin Lee', 'Dr. Olivia Rodriguez',
-    'Dr. Samuel Knight', 'Dr. Ava Chen', 'Dr. William Garcia',
-    'Dr. Sophia Miller', 'Dr. Jacob Wilson', 'Dr. Isabella Davis'
-  ];
-
-  const handleDoctorCheckboxChange = (doctor) => {
-    setSelectedDoctors(prev => {
-      if (prev.includes(doctor)) {
-        return prev.filter(d => d !== doctor);
+  const handleUserCheckboxChange = (user) => {
+    setSelectedUsers(prev => {
+      if (prev.includes(user)) {
+        return prev.filter(u => u !== user);
       } else {
-        return [...prev, doctor];
+        return [...prev, user];
       }
     });
   };
+
+  // Fetch users on component mount
+  React.useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axiosInstance.get('/users');
+        console.log('Users fetched:', response.data);
+        setUserList(response.data.data || []);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        setUserList([]);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   // Convert dd/mm/yyyy to yyyy-mm-dd for API
   const convertDateForAPI = (dateString) => {
@@ -49,8 +60,8 @@ const DrRectVisitDetail = () => {
     const fromDate = convertDateForAPI(fromDateInput);
     const toDate = convertDateForAPI(toDateInput);
     
-    if (viewOption !== 'UserWise' || doctorSelect !== 'allDoctors' || (reportType !== 'All' && reportType !== 'Only Doctor Ch.' && reportType !== 'Only Service Ch.' && reportType !== "Doctor's Ch. (Summary)" && reportType !== 'Visit ID Wise' && reportType !== 'Visit Type Wise' && reportType !== 'Visit Type User Wise' && reportType !== 'Registration No Wise' && reportType !== 'Visit Type grp Wise')) {
-      alert('Please select: View Options = UserWise, Doctor Selection = All Doctors, Report Type = All, Only Doctor Ch., Only Service Ch., Doctor\'s Ch. (Summary), Visit ID Wise, Visit Type Wise, Visit Type User Wise, Registration No Wise, or Visit Type grp Wise');
+    if (viewOption !== 'UserWise' || (reportType !== 'All' && reportType !== 'Only Doctor Ch.' && reportType !== 'Only Service Ch.' && reportType !== "Doctor's Ch. (Summary)" && reportType !== 'Visit ID Wise' && reportType !== 'Visit Type Wise' && reportType !== 'Visit Type User Wise' && reportType !== 'Registration No Wise' && reportType !== 'Visit Type grp Wise' && reportType !== 'COMPANY WISE')) {
+      alert('Please select: View Options = UserWise, Report Type = All, Only Doctor Ch., Only Service Ch., Doctor\'s Ch. (Summary), Visit ID Wise, Visit Type Wise, Visit Type User Wise, Registration No Wise, Visit Type grp Wise, or COMPANY WISE');
       return;
     }
     
@@ -58,7 +69,7 @@ const DrRectVisitDetail = () => {
     
     try {
       const response = await axiosInstance.get(`/patient-visits-enhanced/date-range?fromDate=${fromDate}&toDate=${toDate}`);
-      const apiData = response.data.data;
+      let apiData = response.data.data;
       
       if (!apiData || apiData.length === 0) {
         alert('No data found for the selected date range');
@@ -66,7 +77,18 @@ const DrRectVisitDetail = () => {
         return;
       }
       
-      const pdfGenerator = getPDFGenerator(viewOption, doctorSelect, reportType);
+      // Filter by selected users if selective users is chosen
+      if (entryBySelect === 'selectiveUsers' && selectedUsers.length > 0) {
+        apiData = apiData.filter(visit => selectedUsers.includes(visit.UserName));
+        
+        if (apiData.length === 0) {
+          alert('No data found for the selected users in the date range');
+          setLoading(false);
+          return;
+        }
+      }
+      
+      const pdfGenerator = getPDFGenerator(viewOption, 'allDoctors', reportType);
       const doc = pdfGenerator(apiData, fromDateInput, toDateInput);
       window.open(doc.output('bloburl'), '_blank');
     } catch (error) {
@@ -219,48 +241,48 @@ const DrRectVisitDetail = () => {
               </div>
             </div>
 
-            {/* Doctor Selection */}
+            {/* Entry By Selection */}
             <div className="mb-4 border rounded-3 p-3 bg-light shadow-sm">
-              <h6 className="fw-bold mb-3 text-dark">Doctor Selection</h6>
+              <h6 className="fw-bold mb-3 text-dark">Entry By Selection</h6>
               <div className="mb-3">
                 <div className="form-check form-check-inline me-4">
                   <input 
                     className="form-check-input" 
                     type="radio" 
-                    name="doctorSelect" 
-                    id="allDoctors" 
-                    checked={doctorSelect === 'allDoctors'}
-                    onChange={() => setDoctorSelect('allDoctors')}
+                    name="entryBySelect" 
+                    id="allUsers" 
+                    checked={entryBySelect === 'allUsers'}
+                    onChange={() => setEntryBySelect('allUsers')}
                   />
-                  <label className="form-check-label" htmlFor="allDoctors">All Doctors</label>
+                  <label className="form-check-label" htmlFor="allUsers">All Users</label>
                 </div>
                 <div className="form-check form-check-inline">
                   <input 
                     className="form-check-input" 
                     type="radio" 
-                    name="doctorSelect" 
-                    id="selectiveDoctors" 
-                    checked={doctorSelect === 'selectiveDoctors'}
-                    onChange={() => setDoctorSelect('selectiveDoctors')}
+                    name="entryBySelect" 
+                    id="selectiveUsers" 
+                    checked={entryBySelect === 'selectiveUsers'}
+                    onChange={() => setEntryBySelect('selectiveUsers')}
                   />
-                  <label className="form-check-label" htmlFor="selectiveDoctors">Selective Doctors</label>
+                  <label className="form-check-label" htmlFor="selectiveUsers">Selective Users</label>
                 </div>
               </div>
 
-              {doctorSelect === 'selectiveDoctors' && (
+              {entryBySelect === 'selectiveUsers' && (
                 <div className="row mt-2 g-2 overflow-auto border p-2 rounded" style={{ maxHeight: '180px' }}>
-                  {doctorList.map((doctor, i) => (
+                  {userList.map((user, i) => (
                     <div className="col-md-6 col-lg-4" key={i}>
                       <div className="form-check">
                         <input 
                           className="form-check-input" 
                           type="checkbox" 
-                          id={`doc-${i}`}
-                          checked={selectedDoctors.includes(doctor)}
-                          onChange={() => handleDoctorCheckboxChange(doctor)}
+                          id={`user-${i}`}
+                          checked={selectedUsers.includes(user.UserName)}
+                          onChange={() => handleUserCheckboxChange(user.UserName)}
                         />
-                        <label className="form-check-label" htmlFor={`doc-${i}`}>
-                          {doctor}
+                        <label className="form-check-label" htmlFor={`user-${i}`}>
+                          {user.UserName} (ID: {user.UserId})
                         </label>
                       </div>
                     </div>
