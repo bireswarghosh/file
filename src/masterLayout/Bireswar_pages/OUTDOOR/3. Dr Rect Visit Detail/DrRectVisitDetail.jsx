@@ -49,8 +49,8 @@ const DrRectVisitDetail = () => {
     const fromDate = convertDateForAPI(fromDateInput);
     const toDate = convertDateForAPI(toDateInput);
     
-    if (viewOption !== 'UserWise' || doctorSelect !== 'allDoctors' || (reportType !== 'All' && reportType !== 'Only Doctor Ch.' && reportType !== 'Only Service Ch.' && reportType !== "Doctor's Ch. (Summary)" && reportType !== 'Visit ID Wise')) {
-      alert('Please select: View Options = UserWise, Doctor Selection = All Doctors, Report Type = All, Only Doctor Ch., Only Service Ch., Doctor\'s Ch. (Summary), or Visit ID Wise');
+    if (viewOption !== 'UserWise' || doctorSelect !== 'allDoctors' || (reportType !== 'All' && reportType !== 'Only Doctor Ch.' && reportType !== 'Only Service Ch.' && reportType !== "Doctor's Ch. (Summary)" && reportType !== 'Visit ID Wise' && reportType !== 'Visit Type Wise' && reportType !== 'Visit Type User Wise' && reportType !== 'Registration No Wise' && reportType !== 'Visit Type grp Wise')) {
+      alert('Please select: View Options = UserWise, Doctor Selection = All Doctors, Report Type = All, Only Doctor Ch., Only Service Ch., Doctor\'s Ch. (Summary), Visit ID Wise, Visit Type Wise, Visit Type User Wise, Registration No Wise, or Visit Type grp Wise');
       return;
     }
     
