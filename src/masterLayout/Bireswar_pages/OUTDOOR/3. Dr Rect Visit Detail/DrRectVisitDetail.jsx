@@ -8,12 +8,18 @@ const DrRectVisitDetail = () => {
   const fromDateRef = useRef();
   const toDateRef = useRef();
   const [viewOption, setViewOption] = useState('UserWise');
-
   const [reportType, setReportType] = useState('All');
   const [loading, setLoading] = useState(false);
   const [entryBySelect, setEntryBySelect] = useState('allUsers');
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [userList, setUserList] = useState([]);
+  const [doctorSelect, setDoctorSelect] = useState('allDoctors');
+  const [selectedDoctors, setSelectedDoctors] = useState([]);
+  const [doctorList, setDoctorList] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [doctorsPerPage] = useState(8);
+  const [doctorSearchTerm, setDoctorSearchTerm] = useState('');
+  const [filteredDoctors, setFilteredDoctors] = useState([]);
 
   const handleUserCheckboxChange = (user) => {
     setSelectedUsers(prev => {
@@ -25,20 +31,50 @@ const DrRectVisitDetail = () => {
     });
   };
 
-  // Fetch users on component mount
+  const handleDoctorCheckboxChange = (doctor) => {
+    setSelectedDoctors(prev => {
+      if (prev.includes(doctor)) {
+        return prev.filter(d => d !== doctor);
+      } else {
+        return [...prev, doctor];
+      }
+    });
+  };
+
+  // Fetch users and doctors on component mount
   React.useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await axiosInstance.get('/users');
-        console.log('Users fetched:', response.data);
         setUserList(response.data.data || []);
       } catch (error) {
         console.error('Error fetching users:', error);
         setUserList([]);
       }
     };
+    
+    const fetchDoctors = async () => {
+      try {
+        const response = await axiosInstance.get('/doctors');
+        setDoctorList(response.data.data || []);
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+        setDoctorList([]);
+      }
+    };
+    
     fetchUsers();
+    fetchDoctors();
   }, []);
+
+  // Filter doctors based on search term
+  React.useEffect(() => {
+    const filtered = doctorList.filter(doctor => 
+      doctor.Doctor.toLowerCase().includes(doctorSearchTerm.toLowerCase())
+    );
+    setFilteredDoctors(filtered);
+    setCurrentPage(1); // Reset to first page when searching
+  }, [doctorList, doctorSearchTerm]);
 
   // Convert dd/mm/yyyy to yyyy-mm-dd for API
   const convertDateForAPI = (dateString) => {
@@ -60,8 +96,8 @@ const DrRectVisitDetail = () => {
     const fromDate = convertDateForAPI(fromDateInput);
     const toDate = convertDateForAPI(toDateInput);
     
-    if (viewOption !== 'UserWise' || (reportType !== 'All' && reportType !== 'Only Doctor Ch.' && reportType !== 'Only Service Ch.' && reportType !== "Doctor's Ch. (Summary)" && reportType !== 'Visit ID Wise' && reportType !== 'Visit Type Wise' && reportType !== 'Visit Type User Wise' && reportType !== 'Registration No Wise' && reportType !== 'Visit Type grp Wise' && reportType !== 'COMPANY WISE')) {
-      alert('Please select: View Options = UserWise, Report Type = All, Only Doctor Ch., Only Service Ch., Doctor\'s Ch. (Summary), Visit ID Wise, Visit Type Wise, Visit Type User Wise, Registration No Wise, Visit Type grp Wise, or COMPANY WISE');
+    if ((viewOption !== 'UserWise' && viewOption !== 'DoctorWise') || (reportType !== 'All' && reportType !== 'Only Doctor Ch.' && reportType !== 'Only Service Ch.' && reportType !== "Doctor's Ch. (Summary)" && reportType !== 'Visit ID Wise' && reportType !== 'Visit Type Wise' && reportType !== 'Visit Type User Wise' && reportType !== 'Registration No Wise' && reportType !== 'Visit Type grp Wise' && reportType !== 'COMPANY WISE')) {
+      alert('Please select: View Options = UserWise or DoctorWise, Report Type = All, Only Doctor Ch., Only Service Ch., Doctor\'s Ch. (Summary), Visit ID Wise, Visit Type Wise, Visit Type User Wise, Registration No Wise, Visit Type grp Wise, or COMPANY WISE');
       return;
     }
     
@@ -78,7 +114,7 @@ const DrRectVisitDetail = () => {
       }
       
       // Filter by selected users if selective users is chosen
-      if (entryBySelect === 'selectiveUsers' && selectedUsers.length > 0) {
+      if (viewOption === 'UserWise' && entryBySelect === 'selectiveUsers' && selectedUsers.length > 0) {
         apiData = apiData.filter(visit => selectedUsers.includes(visit.UserName));
         
         if (apiData.length === 0) {
@@ -88,7 +124,19 @@ const DrRectVisitDetail = () => {
         }
       }
       
-      const pdfGenerator = getPDFGenerator(viewOption, 'allDoctors', reportType);
+      // Filter by selected doctors if selective doctors is chosen
+      if (viewOption === 'DoctorWise' && doctorSelect === 'selectiveDoctors' && selectedDoctors.length > 0) {
+        apiData = apiData.filter(visit => selectedDoctors.includes(visit.DoctorName));
+        
+        if (apiData.length === 0) {
+          alert('No data found for the selected doctors in the date range');
+          setLoading(false);
+          return;
+        }
+      }
+      
+      const doctorOption = viewOption === 'DoctorWise' ? (doctorSelect === 'selectiveDoctors' ? 'selectiveDoctors' : 'allDoctors') : 'allDoctors';
+      const pdfGenerator = getPDFGenerator(viewOption, doctorOption, reportType);
       const doc = pdfGenerator(apiData, fromDateInput, toDateInput);
       window.open(doc.output('bloburl'), '_blank');
     } catch (error) {
@@ -241,55 +289,165 @@ const DrRectVisitDetail = () => {
               </div>
             </div>
 
-            {/* Entry By Selection */}
-            <div className="mb-4 border rounded-3 p-3 bg-light shadow-sm">
-              <h6 className="fw-bold mb-3 text-dark">Entry By Selection</h6>
-              <div className="mb-3">
-                <div className="form-check form-check-inline me-4">
-                  <input 
-                    className="form-check-input" 
-                    type="radio" 
-                    name="entryBySelect" 
-                    id="allUsers" 
-                    checked={entryBySelect === 'allUsers'}
-                    onChange={() => setEntryBySelect('allUsers')}
-                  />
-                  <label className="form-check-label" htmlFor="allUsers">All Users</label>
+            {/* Entry By Selection - Only show for UserWise */}
+            {viewOption === 'UserWise' && (
+              <div className="mb-4 border rounded-3 p-3 bg-light shadow-sm">
+                <h6 className="fw-bold mb-3 text-dark">Entry By Selection</h6>
+                <div className="mb-3">
+                  <div className="form-check form-check-inline me-4">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      name="entryBySelect" 
+                      id="allUsers" 
+                      checked={entryBySelect === 'allUsers'}
+                      onChange={() => setEntryBySelect('allUsers')}
+                    />
+                    <label className="form-check-label" htmlFor="allUsers">All Users</label>
+                  </div>
+                  <div className="form-check form-check-inline">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      name="entryBySelect" 
+                      id="selectiveUsers" 
+                      checked={entryBySelect === 'selectiveUsers'}
+                      onChange={() => setEntryBySelect('selectiveUsers')}
+                    />
+                    <label className="form-check-label" htmlFor="selectiveUsers">Selective Users</label>
+                  </div>
                 </div>
-                <div className="form-check form-check-inline">
-                  <input 
-                    className="form-check-input" 
-                    type="radio" 
-                    name="entryBySelect" 
-                    id="selectiveUsers" 
-                    checked={entryBySelect === 'selectiveUsers'}
-                    onChange={() => setEntryBySelect('selectiveUsers')}
-                  />
-                  <label className="form-check-label" htmlFor="selectiveUsers">Selective Users</label>
-                </div>
-              </div>
 
-              {entryBySelect === 'selectiveUsers' && (
-                <div className="row mt-2 g-2 overflow-auto border p-2 rounded" style={{ maxHeight: '180px' }}>
-                  {userList.map((user, i) => (
-                    <div className="col-md-6 col-lg-4" key={i}>
-                      <div className="form-check">
-                        <input 
-                          className="form-check-input" 
-                          type="checkbox" 
-                          id={`user-${i}`}
-                          checked={selectedUsers.includes(user.UserName)}
-                          onChange={() => handleUserCheckboxChange(user.UserName)}
-                        />
-                        <label className="form-check-label" htmlFor={`user-${i}`}>
-                          {user.UserName} (ID: {user.UserId})
-                        </label>
+                {entryBySelect === 'selectiveUsers' && (
+                  <div className="row mt-2 g-2 overflow-auto border p-2 rounded" style={{ maxHeight: '180px' }}>
+                    {userList.map((user, i) => (
+                      <div className="col-md-6 col-lg-4" key={i}>
+                        <div className="form-check">
+                          <input 
+                            className="form-check-input" 
+                            type="checkbox" 
+                            id={`user-${i}`}
+                            checked={selectedUsers.includes(user.UserName)}
+                            onChange={() => handleUserCheckboxChange(user.UserName)}
+                          />
+                          <label className="form-check-label" htmlFor={`user-${i}`}>
+                            {user.UserName} (ID: {user.UserId})
+                          </label>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Doctor Selection - Only show for DoctorWise */}
+            {viewOption === 'DoctorWise' && (
+              <div className="mb-4 border rounded-3 p-3 bg-light shadow-sm">
+                <h6 className="fw-bold mb-3 text-dark">Doctor Selection</h6>
+                <div className="mb-3">
+                  <div className="form-check form-check-inline me-4">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      name="doctorSelect" 
+                      id="allDoctors" 
+                      checked={doctorSelect === 'allDoctors'}
+                      onChange={() => setDoctorSelect('allDoctors')}
+                    />
+                    <label className="form-check-label" htmlFor="allDoctors">All Doctors</label>
+                  </div>
+                  <div className="form-check form-check-inline">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      name="doctorSelect" 
+                      id="selectiveDoctors" 
+                      checked={doctorSelect === 'selectiveDoctors'}
+                      onChange={() => setDoctorSelect('selectiveDoctors')}
+                    />
+                    <label className="form-check-label" htmlFor="selectiveDoctors">Selective Doctors</label>
+                  </div>
                 </div>
-              )}
-            </div>
+
+                {doctorSelect === 'selectiveDoctors' && (
+                  <div>
+                    <div className="mb-3">
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="Search doctor by name..."
+                        value={doctorSearchTerm}
+                        onChange={(e) => setDoctorSearchTerm(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="row mt-2 g-2 overflow-auto border p-2 rounded" style={{ maxHeight: '180px' }}>
+                      {filteredDoctors.slice((currentPage - 1) * doctorsPerPage, currentPage * doctorsPerPage).map((doctor, i) => (
+                        <div className="col-md-6 col-lg-4" key={i}>
+                          <div className="form-check">
+                            <input 
+                              className="form-check-input" 
+                              type="checkbox" 
+                              id={`doctor-${i}`}
+                              checked={selectedDoctors.includes(doctor.Doctor)}
+                              onChange={() => handleDoctorCheckboxChange(doctor.Doctor)}
+                            />
+                            <label className="form-check-label" htmlFor={`doctor-${i}`}>
+                              {doctor.Doctor}
+                            </label>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {filteredDoctors.length > doctorsPerPage && (
+                      <nav className="mt-3">
+                        <ul className="pagination pagination-sm justify-content-center">
+                          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                            <button 
+                              className="page-link" 
+                              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                              disabled={currentPage === 1}
+                            >
+                              ← Prev
+                            </button>
+                          </li>
+                          {(() => {
+                            const totalPages = Math.ceil(filteredDoctors.length / doctorsPerPage);
+                            const maxVisible = 5;
+                            let startPage = Math.max(1, currentPage - 2);
+                            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                            
+                            const pages = [];
+                            for (let i = startPage; i <= endPage; i++) {
+                              pages.push(
+                                <li key={i} className={`page-item ${currentPage === i ? 'active' : ''}`}>
+                                  <button className="page-link" onClick={() => setCurrentPage(i)}>{i}</button>
+                                </li>
+                              );
+                            }
+                            return pages;
+                          })()}
+                          <li className={`page-item ${currentPage === Math.ceil(filteredDoctors.length / doctorsPerPage) ? 'disabled' : ''}`}>
+                            <button 
+                              className="page-link" 
+                              onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredDoctors.length / doctorsPerPage)))}
+                              disabled={currentPage === Math.ceil(filteredDoctors.length / doctorsPerPage)}
+                            >
+                              Next →
+                            </button>
+                          </li>
+                        </ul>
+                        <div className="text-center mt-2 text-muted small">
+                          Showing {Math.min((currentPage - 1) * doctorsPerPage + 1, filteredDoctors.length)} to {Math.min(currentPage * doctorsPerPage, filteredDoctors.length)} of {filteredDoctors.length} doctors
+                        </div>
+                      </nav>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Report Filters */}
             <div className="mb-4 border rounded-3 p-3 bg-light shadow-sm">
