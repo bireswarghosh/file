@@ -1,3 +1,50 @@
+
+
+
+
+
+
+
+
+// PDF Generator Files Mapping (English)
+// Current Selection → PDF File Used
+// View Option	Entry/Doctor Selection	Report Type	PDF File Used
+// UserWise  -	All Users -	All                     ---          UserWise_AllDoctors_all.js
+// UserWise  -	All Users -	Only Doctor Ch.         ---        	UserWise_AllDoctors_summary.js
+// UserWise  -	All Users -	Only Service Ch.        ---         	UserWise_AllDoctors_onlyServiceCh.js
+// UserWise  -	All Users -	Doctor's Ch. (Summary)  ---          UserWise_AllDoctors_doctorSummary.js
+// UserWise  -	All Users -	Visit ID Wise           ---      	  UserWise_AllDoctors_visitIdWise.js
+// UserWise  -	All Users -	Visit Type Wise         ---        	UserWise_AllDoctors_visitTypeWise.js
+// UserWise  -	All Users -	Visit Type User Wise    ---         	UserWise_AllDoctors_visitTypeUserWise.js
+// UserWise  -	All Users -	Registration No Wise    ---         	UserWise_AllDoctors_registrationNoWise.js
+// UserWise  -	All Users -	Visit Type grp Wise     ---        	UserWise_AllDoctors_visitTypeGrpWise.js
+// UserWise  -	All Users -	COMPANY WISE            ---        	UserWise_AllDoctors_companyWise.js
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // PDF Generator Index - Import all PDF formats
 import { generateUserWiseAllDoctorsPDF } from './UserWise_AllDoctors_all';
 import { generateUserWiseAllDoctorsSummaryPDF } from './UserWise_AllDoctors_summary';

@@ -11,7 +11,7 @@ export const generateUserWiseAllDoctorsOnlyServiceChPDF = (data, fromDate, toDat
   // Get user name from API response
   const getUserName = (visit) => {
     return visit.UserName || visit.UserId || '';
-  };
+  }; 
   
   const addHeader = (pageNum) => {
     doc.setFont("helvetica", "bold");
