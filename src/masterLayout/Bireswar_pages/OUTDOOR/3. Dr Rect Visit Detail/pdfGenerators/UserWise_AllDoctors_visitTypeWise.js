@@ -8,6 +8,10 @@ export const generateUserWiseAllDoctorsVisitTypeWisePDF = (data, fromDate, toDat
   let currentPage = 1;
   let totalPages = 1;
   
+  const formatValue = (value) => {
+    return value === 0 ? '' : value.toFixed(2);
+  };
+  
   const getUserName = (visit) => {
     return visit.UserName || visit.UserId || '';
   };
@@ -101,9 +105,9 @@ export const generateUserWiseAllDoctorsVisitTypeWisePDF = (data, fromDate, toDat
     
     const visitTypeData = groupedData[visitType].map(visit => {
       const doctorCh = visit.Rate || 0;
-      const scCharge = visit.ServiceCharge || 0;
-      const rate = visit.Rate || 0;
-      const advAmt = visit.AdvanceAmount || 0;
+      const scCharge = visit.ServiceCh || 0;
+      const rate = doctorCh + scCharge;
+      const advAmt = visit.AdvAmt || 0;
       const discount = visit.Discount || 0;
       const amount = visit.TotAmount || 0;
       
@@ -118,12 +122,12 @@ export const generateUserWiseAllDoctorsVisitTypeWisePDF = (data, fromDate, toDat
         visit.VNo || '',
         visit.PatientName || '',
         visit.DoctorName || '',
-        doctorCh.toFixed(2),
-        scCharge.toFixed(2),
-        rate.toFixed(2),
-        advAmt.toFixed(2),
-        discount.toFixed(2),
-        amount.toFixed(2),
+        formatValue(doctorCh),
+        formatValue(scCharge),
+        formatValue(rate),
+        formatValue(advAmt),
+        formatValue(discount),
+        formatValue(amount),
         getUserName(visit)
       ];
     });
@@ -134,7 +138,7 @@ export const generateUserWiseAllDoctorsVisitTypeWisePDF = (data, fromDate, toDat
       theme: 'grid',
       styles: { fontSize: 7, cellPadding: 1, halign: 'center' },
       columnStyles: {
-        0: { cellWidth: 35, halign: 'left' },
+        0: { cellWidth: 18, halign: 'left' },
         1: { cellWidth: 30, halign: 'left' },
         2: { cellWidth: 28, halign: 'left' },
         3: { cellWidth: 18 },
@@ -155,12 +159,12 @@ export const generateUserWiseAllDoctorsVisitTypeWisePDF = (data, fromDate, toDat
   autoTable(doc, {
     body: [[
       { content: 'Day Total :', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right', fillColor: [255, 255, 255] } },
-      { content: grandTotalDoctorCh.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalScCharge.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalRate.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalAdvAmt.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalDiscount.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalAmount.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalDoctorCh), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalScCharge), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalRate), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalAdvAmt), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalDiscount), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalAmount), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
       ''
     ]],
     startY: currentY,
@@ -187,12 +191,12 @@ export const generateUserWiseAllDoctorsVisitTypeWisePDF = (data, fromDate, toDat
   autoTable(doc, {
     body: [[
       { content: 'Grand Total :', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right', fillColor: [255, 255, 255] } },
-      { content: grandTotalDoctorCh.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalScCharge.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalRate.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalAdvAmt.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalDiscount.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalAmount.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalDoctorCh), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalScCharge), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalRate), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalAdvAmt), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalDiscount), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalAmount), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
       ''
     ]],
     startY: currentY,
