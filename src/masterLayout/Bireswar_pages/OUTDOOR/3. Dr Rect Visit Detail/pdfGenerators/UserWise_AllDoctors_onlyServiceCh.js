@@ -137,7 +137,7 @@ export const generateUserWiseAllDoctorsOnlyServiceChPDF = (data, fromDate, toDat
     doc.text('Doctor Total :', 95, currentY + 5);
     doc.text(doctorTotalSrvCharge.toFixed(2), 135, currentY + 5);
     doc.text(doctorTotalAmount.toFixed(2), 165, currentY + 5);
-    
+
     currentY += 15;
   });
   
