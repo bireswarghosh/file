@@ -140,7 +140,7 @@ export const generateUserWiseAllDoctorsSummaryPDF = (data, fromDate, toDate) => 
     // Doctor Total values inside dashed box
     doc.setFontSize(8);
     doc.setFont("helvetica", "bold");
-    doc.text('Doctor Total :', 40, currentY + 5);
+    doc.text('Doctor Total :', 5, currentY + 5);
     doc.text(doctorTotalCh.toFixed(2), 125, currentY + 5);
     doc.text(doctorTotalDiscount.toFixed(2), 150, currentY + 5);
     doc.text(doctorTotalAmount.toFixed(2), 175, currentY + 5);
