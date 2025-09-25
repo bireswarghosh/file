@@ -643,7 +643,7 @@ export const generateUserWiseAllDoctorsPDF = (data, fromDate, toDate) => {
   doc.text('Net Total Amount After cancel:', 12, boxStartY + 10);
   
   doc.setTextColor(0, 0, 0);
-  doc.text(totalAmount.toFixed(2), 80, boxStartY + 5);
+  doc.text((totalProfChrg - totalDiscount).toFixed(2), 80, boxStartY + 5);
   doc.text(totalAmount.toFixed(2), 80, boxStartY + 10);
   
   // Payment modes on right side
