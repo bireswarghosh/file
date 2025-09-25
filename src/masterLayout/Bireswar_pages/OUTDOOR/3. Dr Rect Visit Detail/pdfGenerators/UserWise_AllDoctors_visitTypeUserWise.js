@@ -8,6 +8,14 @@ export const generateUserWiseAllDoctorsVisitTypeUserWisePDF = (data, fromDate, t
   let currentPage = 1;
   let totalPages = 1;
   
+  const formatValue = (value) => {
+    return value === 0 ? '' : value.toFixed(2);
+  };
+  
+  const formatCount = (value) => {
+    return value === 0 ? '' : value.toString();
+  };
+  
   const getUserName = (visit) => {
     return visit.UserName || visit.UserId || '';
   };
@@ -104,13 +112,16 @@ export const generateUserWiseAllDoctorsVisitTypeUserWisePDF = (data, fromDate, t
       
       // Calculate totals for this user
       const visitCount = userVisits.length;
-      const totalRate = userVisits.reduce((sum, visit) => sum + (visit.Rate || 0), 0);
-      const totalAmount = userVisits.reduce((sum, visit) => sum + (visit.TotAmount || 0), 0);
+      const doctorCh = userVisits.reduce((sum, visit) => sum + (visit.Rate || 0), 0);
+      const serviceCh = userVisits.reduce((sum, visit) => sum + (visit.ServiceCh || 0), 0);
+      const totalRate = doctorCh + serviceCh;
+      const totalAmount = serviceCh;
       const cancelCount = userVisits.filter(visit => visit.Status === 'CANCELLED').length;
       const cancelAmt = 0; // Based on image, this appears to be 0
-      const advAmt = userVisits.reduce((sum, visit) => sum + (visit.AdvanceAmount || 0), 0);
+      const advAmt = userVisits.reduce((sum, visit) => sum + (visit.AdvAmt || 0), 0);
       const discount = userVisits.reduce((sum, visit) => sum + (visit.Discount || 0), 0);
       const finalAmount = totalAmount;
+      const last_finalAmount = userVisits.reduce((sum, visit) => sum + (visit.TotAmount || 0), 0);
       
       // Add to grand totals
       grandTotalVisits += visitCount;
@@ -120,7 +131,7 @@ export const generateUserWiseAllDoctorsVisitTypeUserWisePDF = (data, fromDate, t
       grandTotalCancelAmt += cancelAmt;
       grandTotalAdvAmt += advAmt;
       grandTotalDiscount += discount;
-      grandTotalFinalAmount += finalAmount;
+      grandTotalFinalAmount += last_finalAmount;
       
       // User header
       doc.setFontSize(8);
@@ -132,27 +143,27 @@ export const generateUserWiseAllDoctorsVisitTypeUserWisePDF = (data, fromDate, t
       autoTable(doc, {
         body: [[
           visitType,
-          visitCount.toString(),
-          totalRate.toFixed(2),
-          totalAmount.toFixed(2),
-          cancelCount.toString(),
-          cancelAmt.toFixed(2),
-          advAmt.toFixed(2),
-          discount.toFixed(2),
-          finalAmount.toFixed(2)
+          formatCount(visitCount),
+          formatValue(totalRate),
+          formatValue(totalAmount),
+          formatCount(cancelCount),
+          formatValue(cancelAmt),
+          formatValue(advAmt),
+          formatValue(discount),
+          formatValue(finalAmount)
         ]],
         startY: currentY,
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 1, halign: 'center' },
         columnStyles: {
-          0: { cellWidth: 25, halign: 'left' },
+          0: { cellWidth: 30, halign: 'left' },
           1: { cellWidth: 20 },
           2: { cellWidth: 20 },
           3: { cellWidth: 20 },
-          4: { cellWidth: 20 },
-          5: { cellWidth: 20 },
-          6: { cellWidth: 20 },
-          7: { cellWidth: 20 },
+          4: { cellWidth: 23 },
+          5: { cellWidth: 23 },
+          6: { cellWidth: 23 },
+          7: { cellWidth: 21 },
           8: { cellWidth: 20 }
         },
         margin: { left: 5, right: 5 }
@@ -164,27 +175,27 @@ export const generateUserWiseAllDoctorsVisitTypeUserWisePDF = (data, fromDate, t
       autoTable(doc, {
         body: [[
           '',
-          visitCount.toString(),
-          totalRate.toFixed(2),
-          totalAmount.toFixed(2),
-          cancelCount.toString(),
-          cancelAmt.toFixed(2),
-          advAmt.toFixed(2),
-          discount.toFixed(2),
-          finalAmount.toFixed(2)
+          formatCount(visitCount),
+          formatValue(totalRate),
+          formatValue(totalAmount),
+          formatCount(cancelCount),
+          formatValue(cancelAmt),
+          formatValue(advAmt),
+          formatValue(discount),
+          formatValue(finalAmount)
         ]],
         startY: currentY,
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 1, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.3 },
         columnStyles: {
-          0: { cellWidth: 25 },
+          0: { cellWidth: 30, halign: 'left' },
           1: { cellWidth: 20 },
           2: { cellWidth: 20 },
           3: { cellWidth: 20 },
-          4: { cellWidth: 20 },
-          5: { cellWidth: 20 },
-          6: { cellWidth: 20 },
-          7: { cellWidth: 20 },
+          4: { cellWidth: 23 },
+          5: { cellWidth: 23 },
+          6: { cellWidth: 23 },
+          7: { cellWidth: 21 },
           8: { cellWidth: 20 }
         },
         margin: { left: 5, right: 5 }
@@ -198,28 +209,28 @@ export const generateUserWiseAllDoctorsVisitTypeUserWisePDF = (data, fromDate, t
   autoTable(doc, {
     body: [[
       { content: `Day Total : (${fromDate})`, styles: { fontStyle: 'bold', halign: 'left', fillColor: [255, 255, 255] } },
-      { content: grandTotalVisits.toString(), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalRate.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalAmount.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalCancel.toString(), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalCancelAmt.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalAdvAmt.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalDiscount.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalFinalAmount.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } }
+      { content: formatCount(grandTotalVisits), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalRate), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalAmount), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatCount(grandTotalCancel), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalCancelAmt), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalAdvAmt), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalDiscount), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalFinalAmount), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } }
     ]],
     startY: currentY,
     theme: 'grid',
     styles: { fontSize: 7, cellPadding: 1, lineColor: [0, 0, 0], lineWidth: 0.5 },
     columnStyles: {
-      0: { cellWidth: 25 },
-      1: { cellWidth: 20 },
-      2: { cellWidth: 20 },
-      3: { cellWidth: 20 },
-      4: { cellWidth: 20 },
-      5: { cellWidth: 20 },
-      6: { cellWidth: 20 },
-      7: { cellWidth: 20 },
-      8: { cellWidth: 20 }
+                0: { cellWidth: 30, halign: 'left' },
+          1: { cellWidth: 20 },
+          2: { cellWidth: 20 },
+          3: { cellWidth: 20 },
+          4: { cellWidth: 23 },
+          5: { cellWidth: 23 },
+          6: { cellWidth: 23 },
+          7: { cellWidth: 21 },
+          8: { cellWidth: 20 }
     },
     margin: { left: 5, right: 5 }
   });
@@ -230,28 +241,28 @@ export const generateUserWiseAllDoctorsVisitTypeUserWisePDF = (data, fromDate, t
   autoTable(doc, {
     body: [[
       { content: 'Grand Total :', styles: { fontStyle: 'bold', halign: 'left', fillColor: [255, 255, 255] } },
-      { content: grandTotalVisits.toString(), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalRate.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalAmount.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalCancel.toString(), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalCancelAmt.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalAdvAmt.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalDiscount.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
-      { content: grandTotalFinalAmount.toFixed(2), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } }
+      { content: formatCount(grandTotalVisits), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalRate), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalAmount), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatCount(grandTotalCancel), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalCancelAmt), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalAdvAmt), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalDiscount), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } },
+      { content: formatValue(grandTotalFinalAmount), styles: { fontStyle: 'bold', halign: 'center', fillColor: [255, 255, 255] } }
     ]],
     startY: currentY,
     theme: 'grid',
     styles: { fontSize: 7, cellPadding: 1, lineColor: [255, 0, 0], lineWidth: 1 },
     columnStyles: {
-      0: { cellWidth: 25 },
-      1: { cellWidth: 20 },
-      2: { cellWidth: 20 },
-      3: { cellWidth: 20 },
-      4: { cellWidth: 20 },
-      5: { cellWidth: 20 },
-      6: { cellWidth: 20 },
-      7: { cellWidth: 20 },
-      8: { cellWidth: 20 }
+             0: { cellWidth: 30, halign: 'left' },
+          1: { cellWidth: 20 },
+          2: { cellWidth: 20 },
+          3: { cellWidth: 20 },
+          4: { cellWidth: 23 },
+          5: { cellWidth: 23 },
+          6: { cellWidth: 23 },
+          7: { cellWidth: 21 },
+          8: { cellWidth: 20 }
     },
     margin: { left: 5, right: 5 }
   });
