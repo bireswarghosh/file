@@ -20,6 +20,9 @@ const DrRectVisitDetail = () => {
   const [doctorsPerPage] = useState(8);
   const [doctorSearchTerm, setDoctorSearchTerm] = useState('');
   const [filteredDoctors, setFilteredDoctors] = useState([]);
+  const [visitTypeSelect, setVisitTypeSelect] = useState('allVisitTypes');
+  const [selectedVisitTypes, setSelectedVisitTypes] = useState([]);
+  const [visitTypeList, setVisitTypeList] = useState([]);
 
   const handleUserCheckboxChange = (user) => {
     setSelectedUsers(prev => {
@@ -37,6 +40,16 @@ const DrRectVisitDetail = () => {
         return prev.filter(d => d !== doctor);
       } else {
         return [...prev, doctor];
+      }
+    });
+  };
+
+  const handleVisitTypeCheckboxChange = (visitType) => {
+    setSelectedVisitTypes(prev => {
+      if (prev.includes(visitType)) {
+        return prev.filter(vt => vt !== visitType);
+      } else {
+        return [...prev, visitType];
       }
     });
   };
@@ -63,8 +76,26 @@ const DrRectVisitDetail = () => {
       }
     };
     
+    const fetchVisitTypes = async () => {
+      try {
+        const response = await axiosInstance.get('/visit-types');
+        console.log('Visit Types Response:', response.data);
+        setVisitTypeList(response.data.data || response.data || []);
+      } catch (error) {
+        console.error('Error fetching visit types:', error);
+        // Fallback with common visit types
+        setVisitTypeList([
+          { VisitType: 'CONSULTATION' },
+          { VisitType: 'DIAGNOSIS' },
+          { VisitType: 'REPORTING' },
+          { VisitType: 'FOLLOW UP' }
+        ]);
+      }
+    };
+    
     fetchUsers();
     fetchDoctors();
+    fetchVisitTypes();
   }, []);
 
   // Filter doctors based on search term
@@ -96,8 +127,8 @@ const DrRectVisitDetail = () => {
     const fromDate = convertDateForAPI(fromDateInput);
     const toDate = convertDateForAPI(toDateInput);
     
-    if ((viewOption !== 'UserWise' && viewOption !== 'DoctorWise') || (reportType !== 'All' && reportType !== 'Only Doctor Ch.' && reportType !== 'Only Service Ch.' && reportType !== "Doctor's Ch. (Summary)" && reportType !== 'Visit ID Wise' && reportType !== 'Visit Type Wise' && reportType !== 'Visit Type User Wise' && reportType !== 'Registration No Wise' && reportType !== 'Visit Type grp Wise' && reportType !== 'COMPANY WISE')) {
-      alert('Please select: View Options = UserWise or DoctorWise, Report Type = All, Only Doctor Ch., Only Service Ch., Doctor\'s Ch. (Summary), Visit ID Wise, Visit Type Wise, Visit Type User Wise, Registration No Wise, Visit Type grp Wise, or COMPANY WISE');
+    if ((viewOption !== 'UserWise' && viewOption !== 'DoctorWise' && viewOption !== 'Visit Type') || (reportType !== 'All' && reportType !== 'Only Doctor Ch.' && reportType !== 'Only Service Ch.' && reportType !== "Doctor's Ch. (Summary)" && reportType !== 'Visit ID Wise' && reportType !== 'Visit Type Wise' && reportType !== 'Visit Type User Wise' && reportType !== 'Registration No Wise' && reportType !== 'Visit Type grp Wise' && reportType !== 'COMPANY WISE')) {
+      alert('Please select: View Options = UserWise, DoctorWise, or Visit Type, Report Type = All, Only Doctor Ch., Only Service Ch., Doctor\'s Ch. (Summary), Visit ID Wise, Visit Type Wise, Visit Type User Wise, Registration No Wise, Visit Type grp Wise, or COMPANY WISE');
       return;
     }
     
@@ -135,8 +166,26 @@ const DrRectVisitDetail = () => {
         }
       }
       
-      const doctorOption = viewOption === 'DoctorWise' ? (doctorSelect === 'selectiveDoctors' ? 'selectiveDoctors' : 'allDoctors') : 'allDoctors';
-      const pdfGenerator = getPDFGenerator(viewOption, doctorOption, reportType);
+      // Filter by selected visit types if selective visit types is chosen
+      if (viewOption === 'Visit Type' && visitTypeSelect === 'selectiveVisitTypes' && selectedVisitTypes.length > 0) {
+        apiData = apiData.filter(visit => selectedVisitTypes.includes(visit.VisitTypeName));
+        
+        if (apiData.length === 0) {
+          alert('No data found for the selected visit types in the date range');
+          setLoading(false);
+          return;
+        }
+      }
+      
+      let selectionOption;
+      if (viewOption === 'DoctorWise') {
+        selectionOption = doctorSelect === 'selectiveDoctors' ? 'selectiveDoctors' : 'allDoctors';
+      } else if (viewOption === 'Visit Type') {
+        selectionOption = visitTypeSelect === 'selectiveVisitTypes' ? 'selectiveVisitTypes' : 'allVisitTypes';
+      } else {
+        selectionOption = 'allDoctors';
+      }
+      const pdfGenerator = getPDFGenerator(viewOption, selectionOption, reportType);
       const doc = pdfGenerator(apiData, fromDateInput, toDateInput);
       window.open(doc.output('bloburl'), '_blank');
     } catch (error) {
@@ -443,6 +492,64 @@ const DrRectVisitDetail = () => {
                           Showing {Math.min((currentPage - 1) * doctorsPerPage + 1, filteredDoctors.length)} to {Math.min(currentPage * doctorsPerPage, filteredDoctors.length)} of {filteredDoctors.length} doctors
                         </div>
                       </nav>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Visit Type Selection - Only show for Visit Type */}
+            {viewOption === 'Visit Type' && (
+              <div className="mb-4 border rounded-3 p-3 bg-light shadow-sm">
+                <h6 className="fw-bold mb-3 text-dark">Visit Type Selection</h6>
+                <div className="mb-3">
+                  <div className="form-check form-check-inline me-4">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      name="visitTypeSelect" 
+                      id="allVisitTypes" 
+                      checked={visitTypeSelect === 'allVisitTypes'}
+                      onChange={() => setVisitTypeSelect('allVisitTypes')}
+                    />
+                    <label className="form-check-label" htmlFor="allVisitTypes">All Visit Types</label>
+                  </div>
+                  <div className="form-check form-check-inline">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      name="visitTypeSelect" 
+                      id="selectiveVisitTypes" 
+                      checked={visitTypeSelect === 'selectiveVisitTypes'}
+                      onChange={() => setVisitTypeSelect('selectiveVisitTypes')}
+                    />
+                    <label className="form-check-label" htmlFor="selectiveVisitTypes">Selective Visit Types</label>
+                  </div>
+                </div>
+
+                {visitTypeSelect === 'selectiveVisitTypes' && (
+                  <div>
+                    {visitTypeList.length === 0 ? (
+                      <div className="text-muted">Loading visit types...</div>
+                    ) : (
+                      <div className="row mt-2 g-2 overflow-auto border p-2 rounded" style={{ maxHeight: '180px' }}>
+                        {visitTypeList.map((visitType, i) => (
+                          <div className="col-md-6 col-lg-4" key={i}>
+                            <div className="form-check">
+                              <input 
+                                className="form-check-input" 
+                                type="checkbox" 
+                                id={`visitType-${i}`}
+                                checked={selectedVisitTypes.includes(visitType.VisitType)}
+                                onChange={() => handleVisitTypeCheckboxChange(visitType.VisitType)}
+                              />
+                              <label className="form-check-label" htmlFor={`visitType-${i}`}>
+                                {visitType.VisitType}
+                              </label>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 )}
