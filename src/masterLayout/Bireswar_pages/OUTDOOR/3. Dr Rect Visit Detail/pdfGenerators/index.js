@@ -76,6 +76,10 @@ export const getPDFGenerator = (viewOption, doctorSelect, reportType) => {
     'UserWise_allDoctors_COMPANY WISE': generateUserWiseAllDoctorsCompanyWisePDF,
     'DoctorWise_allDoctors_Only Doctor Ch.': generateDoctorWiseAllDoctorsSummaryPDF,
     'DoctorWise_selectiveDoctors_Only Doctor Ch.': generateDoctorWiseAllDoctorsSummaryPDF,
+    'DoctorWise_allDoctors_Only Service Ch.': generateUserWiseAllDoctorsOnlyServiceChPDF,
+    'DoctorWise_selectiveDoctors_Only Service Ch.': generateUserWiseAllDoctorsOnlyServiceChPDF,
+    'DoctorWise_allDoctors_Doctor\'s Ch. (Summary)': generateUserWiseAllDoctorsDoctorSummaryPDF,
+    'DoctorWise_selectiveDoctors_Doctor\'s Ch. (Summary)': generateUserWiseAllDoctorsDoctorSummaryPDF,
     // Add more generators here as needed
     // 'DoctorWise_allDoctors_All': generateDoctorWiseAllDoctorsPDF,
     // 'UserWise_selectiveDoctors_All': generateUserWiseSelectiveDoctorsPDF,

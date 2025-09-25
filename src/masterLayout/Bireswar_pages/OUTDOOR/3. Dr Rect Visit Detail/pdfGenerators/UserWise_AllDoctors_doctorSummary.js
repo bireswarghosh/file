@@ -8,6 +8,14 @@ export const generateUserWiseAllDoctorsDoctorSummaryPDF = (data, fromDate, toDat
   let currentPage = 1;
   let totalPages = 1;
   
+  const formatValue = (value) => {
+    return value === 0 ? '' : value.toFixed(2);
+  };
+  
+  const formatCount = (value) => {
+    return value === 0 ? '' : value.toString();
+  };
+  
   const addHeader = (pageNum) => {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
@@ -77,8 +85,8 @@ export const generateUserWiseAllDoctorsDoctorSummaryPDF = (data, fromDate, toDat
     
     acc[doctorName].bookingCount += 1;
     acc[doctorName].totalAmt += visit.TotAmount || 0;
-    acc[doctorName].servCh += visit.ServiceCharge || 0;
-    acc[doctorName].regstCh += visit.RegistrationCharge || 0;
+    acc[doctorName].servCh += visit.ServiceCh || 0;
+    acc[doctorName].regstCh += visit.RegCh || 0;
     acc[doctorName].drFees += visit.Rate || 0;
     acc[doctorName].reportingAmount += visit.TotAmount || 0;
     
@@ -118,15 +126,15 @@ export const generateUserWiseAllDoctorsDoctorSummaryPDF = (data, fromDate, toDat
     
     return [
       doctorName,
-      summary.bookingCount.toString(),
-      summary.totalAmt.toFixed(2),
-      summary.servCh.toFixed(2),
-      summary.regstCh.toFixed(2),
-      summary.drFees.toFixed(2),
-      summary.reportingAmount.toFixed(2),
-      summary.cancelCount.toString(),
-      summary.cancelAmt.toFixed(2),
-      summary.netAmount.toFixed(2)
+      formatCount(summary.bookingCount),
+      formatValue(summary.totalAmt),
+      formatValue(summary.servCh),
+      formatValue(summary.regstCh),
+      formatValue(summary.drFees),
+      formatValue(summary.reportingAmount),
+      formatCount(summary.cancelCount),
+      formatValue(summary.cancelAmt),
+      formatValue(summary.netAmount)
     ];
   });
   
@@ -156,15 +164,15 @@ export const generateUserWiseAllDoctorsDoctorSummaryPDF = (data, fromDate, toDat
   autoTable(doc, {
     body: [[
       'Grand Total :',
-      grandTotalBooking.toString(),
-      grandTotalAmt.toFixed(2),
-      grandTotalServCh.toFixed(2),
-      grandTotalRegstCh.toFixed(2),
-      grandTotalDrFees.toFixed(2),
-      grandTotalReportingAmt.toFixed(2),
-      grandTotalCancelCount.toString(),
-      grandTotalCancelAmt.toFixed(2),
-      grandTotalNetAmt.toFixed(2)
+      formatCount(grandTotalBooking),
+      formatValue(grandTotalAmt),
+      formatValue(grandTotalServCh),
+      formatValue(grandTotalRegstCh),
+      formatValue(grandTotalDrFees),
+      formatValue(grandTotalReportingAmt),
+      formatCount(grandTotalCancelCount),
+      formatValue(grandTotalCancelAmt),
+      formatValue(grandTotalNetAmt)
     ]],
     startY: currentY,
     theme: 'grid',
