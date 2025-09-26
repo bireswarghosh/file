@@ -20,6 +20,39 @@
 // UserWise  -	All Users -	Visit Type grp Wise     ---        	UserWise_AllDoctors_visitTypeGrpWise.js
 // UserWise  -	All Users -	COMPANY WISE            ---        	UserWise_AllDoctors_companyWise.js
 
+// RefDoctorWise - All Doctors - All --- UserWise_AllDoctors_all.js
+// RefDoctorWise - All Doctors - Only Doctor Ch. --- UserWise_AllDoctors_summary.js
+// RefDoctorWise - All Doctors - Only Service Ch. --- UserWise_AllDoctors_onlyServiceCh.js
+// RefDoctorWise - All Doctors - Doctor's Ch. (Summary) --- UserWise_AllDoctors_doctorSummary.js
+// RefDoctorWise - All Doctors - Visit ID Wise --- UserWise_AllDoctors_visitIdWise.js
+// RefDoctorWise - All Doctors - Visit Type Wise --- UserWise_AllDoctors_visitTypeWise.js
+// RefDoctorWise - All Doctors - Visit Type User Wise --- UserWise_AllDoctors_visitTypeUserWise.js
+// RefDoctorWise - All Doctors - Registration No Wise --- UserWise_AllDoctors_registrationNoWise.js
+// RefDoctorWise - All Doctors - Visit Type grp Wise --- UserWise_AllDoctors_visitTypeGrpWise.js
+// RefDoctorWise - All Doctors - COMPANY WISE --- UserWise_AllDoctors_companyWise.js
+
+// Ref wise - All Referals - All --- UserWise_AllDoctors_all.js
+// Ref wise - All Referals - Only Doctor Ch. --- UserWise_AllDoctors_summary.js
+// Ref wise - All Referals - Only Service Ch. --- UserWise_AllDoctors_onlyServiceCh.js
+// Ref wise - All Referals - Doctor's Ch. (Summary) --- UserWise_AllDoctors_doctorSummary.js
+// Ref wise - All Referals - Visit ID Wise --- UserWise_AllDoctors_visitIdWise.js
+// Ref wise - All Referals - Visit Type Wise --- UserWise_AllDoctors_visitTypeWise.js
+// Ref wise - All Referals - Visit Type User Wise --- UserWise_AllDoctors_visitTypeUserWise.js
+// Ref wise - All Referals - Registration No Wise --- UserWise_AllDoctors_registrationNoWise.js
+// Ref wise - All Referals - Visit Type grp Wise --- UserWise_AllDoctors_visitTypeGrpWise.js
+// Ref wise - All Referals - COMPANY WISE --- UserWise_AllDoctors_companyWise.js
+
+// Advance Booking - All Referals - All --- UserWise_AllDoctors_all.js
+// Advance Booking - All Referals - Only Doctor Ch. --- UserWise_AllDoctors_summary.js
+// Advance Booking - All Referals - Only Service Ch. --- UserWise_AllDoctors_onlyServiceCh.js
+// Advance Booking - All Referals - Doctor's Ch. (Summary) --- UserWise_AllDoctors_doctorSummary.js
+// Advance Booking - All Referals - Visit ID Wise --- UserWise_AllDoctors_visitIdWise.js
+// Advance Booking - All Referals - Visit Type Wise --- UserWise_AllDoctors_visitTypeWise.js
+// Advance Booking - All Referals - Visit Type User Wise --- UserWise_AllDoctors_visitTypeUserWise.js
+// Advance Booking - All Referals - Registration No Wise --- UserWise_AllDoctors_registrationNoWise.js
+// Advance Booking - All Referals - Visit Type grp Wise --- UserWise_AllDoctors_visitTypeGrpWise.js
+// Advance Booking - All Referals - COMPANY WISE --- UserWise_AllDoctors_companyWise.js
+
 
 
 
@@ -114,6 +147,66 @@ export const getPDFGenerator = (viewOption, doctorSelect, reportType) => {
     'Visit Type_selectiveVisitTypes_Visit Type grp Wise': generateUserWiseAllDoctorsVisitTypeGrpWisePDF,
     'Visit Type_allVisitTypes_COMPANY WISE': generateUserWiseAllDoctorsCompanyWisePDF,
     'Visit Type_selectiveVisitTypes_COMPANY WISE': generateUserWiseAllDoctorsCompanyWisePDF,
+    'RefDoctorWise_allDoctors_All': generateUserWiseAllDoctorsPDF,
+    'RefDoctorWise_selectiveDoctors_All': generateUserWiseAllDoctorsPDF,
+    'RefDoctorWise_allDoctors_Only Doctor Ch.': generateUserWiseAllDoctorsSummaryPDF,
+    'RefDoctorWise_selectiveDoctors_Only Doctor Ch.': generateUserWiseAllDoctorsSummaryPDF,
+    'RefDoctorWise_allDoctors_Only Service Ch.': generateUserWiseAllDoctorsOnlyServiceChPDF,
+    'RefDoctorWise_selectiveDoctors_Only Service Ch.': generateUserWiseAllDoctorsOnlyServiceChPDF,
+    'RefDoctorWise_allDoctors_Doctor\'s Ch. (Summary)': generateUserWiseAllDoctorsDoctorSummaryPDF,
+    'RefDoctorWise_selectiveDoctors_Doctor\'s Ch. (Summary)': generateUserWiseAllDoctorsDoctorSummaryPDF,
+    'RefDoctorWise_allDoctors_Visit ID Wise': generateUserWiseAllDoctorsVisitIdWisePDF,
+    'RefDoctorWise_selectiveDoctors_Visit ID Wise': generateUserWiseAllDoctorsVisitIdWisePDF,
+    'RefDoctorWise_allDoctors_Visit Type Wise': generateUserWiseAllDoctorsVisitTypeWisePDF,
+    'RefDoctorWise_selectiveDoctors_Visit Type Wise': generateUserWiseAllDoctorsVisitTypeWisePDF,
+    'RefDoctorWise_allDoctors_Visit Type User Wise': generateUserWiseAllDoctorsVisitTypeUserWisePDF,
+    'RefDoctorWise_selectiveDoctors_Visit Type User Wise': generateUserWiseAllDoctorsVisitTypeUserWisePDF,
+    'RefDoctorWise_allDoctors_Registration No Wise': generateUserWiseAllDoctorsRegistrationNoWisePDF,
+    'RefDoctorWise_selectiveDoctors_Registration No Wise': generateUserWiseAllDoctorsRegistrationNoWisePDF,
+    'RefDoctorWise_allDoctors_Visit Type grp Wise': generateUserWiseAllDoctorsVisitTypeGrpWisePDF,
+    'RefDoctorWise_selectiveDoctors_Visit Type grp Wise': generateUserWiseAllDoctorsVisitTypeGrpWisePDF,
+    'RefDoctorWise_allDoctors_COMPANY WISE': generateUserWiseAllDoctorsCompanyWisePDF,
+    'RefDoctorWise_selectiveDoctors_COMPANY WISE': generateUserWiseAllDoctorsCompanyWisePDF,
+    'Ref wise_allReferals_All': generateUserWiseAllDoctorsPDF,
+    'Ref wise_selectiveReferals_All': generateUserWiseAllDoctorsPDF,
+    'Ref wise_allReferals_Only Doctor Ch.': generateUserWiseAllDoctorsSummaryPDF,
+    'Ref wise_selectiveReferals_Only Doctor Ch.': generateUserWiseAllDoctorsSummaryPDF,
+    'Ref wise_allReferals_Only Service Ch.': generateUserWiseAllDoctorsOnlyServiceChPDF,
+    'Ref wise_selectiveReferals_Only Service Ch.': generateUserWiseAllDoctorsOnlyServiceChPDF,
+    'Ref wise_allReferals_Doctor\'s Ch. (Summary)': generateUserWiseAllDoctorsDoctorSummaryPDF,
+    'Ref wise_selectiveReferals_Doctor\'s Ch. (Summary)': generateUserWiseAllDoctorsDoctorSummaryPDF,
+    'Ref wise_allReferals_Visit ID Wise': generateUserWiseAllDoctorsVisitIdWisePDF,
+    'Ref wise_selectiveReferals_Visit ID Wise': generateUserWiseAllDoctorsVisitIdWisePDF,
+    'Ref wise_allReferals_Visit Type Wise': generateUserWiseAllDoctorsVisitTypeWisePDF,
+    'Ref wise_selectiveReferals_Visit Type Wise': generateUserWiseAllDoctorsVisitTypeWisePDF,
+    'Ref wise_allReferals_Visit Type User Wise': generateUserWiseAllDoctorsVisitTypeUserWisePDF,
+    'Ref wise_selectiveReferals_Visit Type User Wise': generateUserWiseAllDoctorsVisitTypeUserWisePDF,
+    'Ref wise_allReferals_Registration No Wise': generateUserWiseAllDoctorsRegistrationNoWisePDF,
+    'Ref wise_selectiveReferals_Registration No Wise': generateUserWiseAllDoctorsRegistrationNoWisePDF,
+    'Ref wise_allReferals_Visit Type grp Wise': generateUserWiseAllDoctorsVisitTypeGrpWisePDF,
+    'Ref wise_selectiveReferals_Visit Type grp Wise': generateUserWiseAllDoctorsVisitTypeGrpWisePDF,
+    'Ref wise_allReferals_COMPANY WISE': generateUserWiseAllDoctorsCompanyWisePDF,
+    'Ref wise_selectiveReferals_COMPANY WISE': generateUserWiseAllDoctorsCompanyWisePDF,
+    'Advance Booking_allReferals_All': generateUserWiseAllDoctorsPDF,
+    'Advance Booking_selectiveReferals_All': generateUserWiseAllDoctorsPDF,
+    'Advance Booking_allReferals_Only Doctor Ch.': generateUserWiseAllDoctorsSummaryPDF,
+    'Advance Booking_selectiveReferals_Only Doctor Ch.': generateUserWiseAllDoctorsSummaryPDF,
+    'Advance Booking_allReferals_Only Service Ch.': generateUserWiseAllDoctorsOnlyServiceChPDF,
+    'Advance Booking_selectiveReferals_Only Service Ch.': generateUserWiseAllDoctorsOnlyServiceChPDF,
+    'Advance Booking_allReferals_Doctor\'s Ch. (Summary)': generateUserWiseAllDoctorsDoctorSummaryPDF,
+    'Advance Booking_selectiveReferals_Doctor\'s Ch. (Summary)': generateUserWiseAllDoctorsDoctorSummaryPDF,
+    'Advance Booking_allReferals_Visit ID Wise': generateUserWiseAllDoctorsVisitIdWisePDF,
+    'Advance Booking_selectiveReferals_Visit ID Wise': generateUserWiseAllDoctorsVisitIdWisePDF,
+    'Advance Booking_allReferals_Visit Type Wise': generateUserWiseAllDoctorsVisitTypeWisePDF,
+    'Advance Booking_selectiveReferals_Visit Type Wise': generateUserWiseAllDoctorsVisitTypeWisePDF,
+    'Advance Booking_allReferals_Visit Type User Wise': generateUserWiseAllDoctorsVisitTypeUserWisePDF,
+    'Advance Booking_selectiveReferals_Visit Type User Wise': generateUserWiseAllDoctorsVisitTypeUserWisePDF,
+    'Advance Booking_allReferals_Registration No Wise': generateUserWiseAllDoctorsRegistrationNoWisePDF,
+    'Advance Booking_selectiveReferals_Registration No Wise': generateUserWiseAllDoctorsRegistrationNoWisePDF,
+    'Advance Booking_allReferals_Visit Type grp Wise': generateUserWiseAllDoctorsVisitTypeGrpWisePDF,
+    'Advance Booking_selectiveReferals_Visit Type grp Wise': generateUserWiseAllDoctorsVisitTypeGrpWisePDF,
+    'Advance Booking_allReferals_COMPANY WISE': generateUserWiseAllDoctorsCompanyWisePDF,
+    'Advance Booking_selectiveReferals_COMPANY WISE': generateUserWiseAllDoctorsCompanyWisePDF,
     // Add more generators here as needed
     // 'DoctorWise_allDoctors_All': generateDoctorWiseAllDoctorsPDF,
     // 'UserWise_selectiveDoctors_All': generateUserWiseSelectiveDoctorsPDF,

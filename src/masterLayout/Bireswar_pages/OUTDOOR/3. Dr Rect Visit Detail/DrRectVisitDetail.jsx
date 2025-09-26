@@ -23,6 +23,22 @@ const DrRectVisitDetail = () => {
   const [visitTypeSelect, setVisitTypeSelect] = useState('allVisitTypes');
   const [selectedVisitTypes, setSelectedVisitTypes] = useState([]);
   const [visitTypeList, setVisitTypeList] = useState([]);
+  const [refDoctorSelect, setRefDoctorSelect] = useState('allDoctors');
+  const [selectedRefDoctors, setSelectedRefDoctors] = useState([]);
+  const [refWiseSelect, setRefWiseSelect] = useState('allReferals');
+  const [selectedRefWise, setSelectedRefWise] = useState([]);
+  const [refDoctorSearchTerm, setRefDoctorSearchTerm] = useState('');
+  const [filteredRefDoctors, setFilteredRefDoctors] = useState([]);
+  const [refDoctorCurrentPage, setRefDoctorCurrentPage] = useState(1);
+  const [refWiseSearchTerm, setRefWiseSearchTerm] = useState('');
+  const [filteredRefWise, setFilteredRefWise] = useState([]);
+  const [refWiseCurrentPage, setRefWiseCurrentPage] = useState(1);
+  const [referalList, setReferalList] = useState([]);
+  const [advanceBookingSelect, setAdvanceBookingSelect] = useState('allReferals');
+  const [selectedAdvanceBooking, setSelectedAdvanceBooking] = useState([]);
+  const [advanceBookingSearchTerm, setAdvanceBookingSearchTerm] = useState('');
+  const [filteredAdvanceBooking, setFilteredAdvanceBooking] = useState([]);
+  const [advanceBookingCurrentPage, setAdvanceBookingCurrentPage] = useState(1);
 
   const handleUserCheckboxChange = (user) => {
     setSelectedUsers(prev => {
@@ -50,6 +66,36 @@ const DrRectVisitDetail = () => {
         return prev.filter(vt => vt !== visitType);
       } else {
         return [...prev, visitType];
+      }
+    });
+  };
+
+  const handleRefDoctorCheckboxChange = (doctor) => {
+    setSelectedRefDoctors(prev => {
+      if (prev.includes(doctor)) {
+        return prev.filter(d => d !== doctor);
+      } else {
+        return [...prev, doctor];
+      }
+    });
+  };
+
+  const handleRefWiseCheckboxChange = (ref) => {
+    setSelectedRefWise(prev => {
+      if (prev.includes(ref)) {
+        return prev.filter(r => r !== ref);
+      } else {
+        return [...prev, ref];
+      }
+    });
+  };
+
+  const handleAdvanceBookingCheckboxChange = (ref) => {
+    setSelectedAdvanceBooking(prev => {
+      if (prev.includes(ref)) {
+        return prev.filter(r => r !== ref);
+      } else {
+        return [...prev, ref];
       }
     });
   };
@@ -93,9 +139,20 @@ const DrRectVisitDetail = () => {
       }
     };
     
+    const fetchReferals = async () => {
+      try {
+        const response = await axiosInstance.get('/referals');
+        setReferalList(response.data.data || []);
+      } catch (error) {
+        console.error('Error fetching referals:', error);
+        setReferalList([]);
+      }
+    };
+    
     fetchUsers();
     fetchDoctors();
     fetchVisitTypes();
+    fetchReferals();
   }, []);
 
   // Filter doctors based on search term
@@ -106,6 +163,33 @@ const DrRectVisitDetail = () => {
     setFilteredDoctors(filtered);
     setCurrentPage(1); // Reset to first page when searching
   }, [doctorList, doctorSearchTerm]);
+
+  // Filter ref doctors based on search term
+  React.useEffect(() => {
+    const filtered = doctorList.filter(doctor => 
+      doctor.Doctor.toLowerCase().includes(refDoctorSearchTerm.toLowerCase())
+    );
+    setFilteredRefDoctors(filtered);
+    setRefDoctorCurrentPage(1);
+  }, [doctorList, refDoctorSearchTerm]);
+
+  // Filter ref wise based on search term
+  React.useEffect(() => {
+    const filtered = referalList.filter(referal => 
+      referal.Referal.toLowerCase().includes(refWiseSearchTerm.toLowerCase())
+    );
+    setFilteredRefWise(filtered);
+    setRefWiseCurrentPage(1);
+  }, [referalList, refWiseSearchTerm]);
+
+  // Filter advance booking based on search term
+  React.useEffect(() => {
+    const filtered = referalList.filter(referal => 
+      referal.Referal.toLowerCase().includes(advanceBookingSearchTerm.toLowerCase())
+    );
+    setFilteredAdvanceBooking(filtered);
+    setAdvanceBookingCurrentPage(1);
+  }, [referalList, advanceBookingSearchTerm]);
 
   // Convert dd/mm/yyyy to yyyy-mm-dd for API
   const convertDateForAPI = (dateString) => {
@@ -127,8 +211,8 @@ const DrRectVisitDetail = () => {
     const fromDate = convertDateForAPI(fromDateInput);
     const toDate = convertDateForAPI(toDateInput);
     
-    if ((viewOption !== 'UserWise' && viewOption !== 'DoctorWise' && viewOption !== 'Visit Type') || (reportType !== 'All' && reportType !== 'Only Doctor Ch.' && reportType !== 'Only Service Ch.' && reportType !== "Doctor's Ch. (Summary)" && reportType !== 'Visit ID Wise' && reportType !== 'Visit Type Wise' && reportType !== 'Visit Type User Wise' && reportType !== 'Registration No Wise' && reportType !== 'Visit Type grp Wise' && reportType !== 'COMPANY WISE')) {
-      alert('Please select: View Options = UserWise, DoctorWise, or Visit Type, Report Type = All, Only Doctor Ch., Only Service Ch., Doctor\'s Ch. (Summary), Visit ID Wise, Visit Type Wise, Visit Type User Wise, Registration No Wise, Visit Type grp Wise, or COMPANY WISE');
+    if ((viewOption !== 'UserWise' && viewOption !== 'DoctorWise' && viewOption !== 'Visit Type' && viewOption !== 'RefDoctorWise' && viewOption !== 'Ref wise' && viewOption !== 'Advance Booking') || (reportType !== 'All' && reportType !== 'Only Doctor Ch.' && reportType !== 'Only Service Ch.' && reportType !== "Doctor's Ch. (Summary)" && reportType !== 'Visit ID Wise' && reportType !== 'Visit Type Wise' && reportType !== 'Visit Type User Wise' && reportType !== 'Registration No Wise' && reportType !== 'Visit Type grp Wise' && reportType !== 'COMPANY WISE')) {
+      alert('Please select: View Options = UserWise, DoctorWise, Visit Type, RefDoctorWise, Ref wise, or Advance Booking, Report Type = All, Only Doctor Ch., Only Service Ch., Doctor\'s Ch. (Summary), Visit ID Wise, Visit Type Wise, Visit Type User Wise, Registration No Wise, Visit Type grp Wise, or COMPANY WISE');
       return;
     }
     
@@ -177,11 +261,50 @@ const DrRectVisitDetail = () => {
         }
       }
       
+      // Filter by selected ref doctors if selective ref doctors is chosen
+      if (viewOption === 'RefDoctorWise' && refDoctorSelect === 'selectiveDoctors' && selectedRefDoctors.length > 0) {
+        apiData = apiData.filter(visit => selectedRefDoctors.includes(visit.DoctorName));
+        
+        if (apiData.length === 0) {
+          alert('No data found for the selected ref doctors in the date range');
+          setLoading(false);
+          return;
+        }
+      }
+      
+      // Filter by selected ref wise if selective referals is chosen
+      if (viewOption === 'Ref wise' && refWiseSelect === 'selectiveReferals' && selectedRefWise.length > 0) {
+        apiData = apiData.filter(visit => selectedRefWise.includes(visit.Referalid));
+        
+        if (apiData.length === 0) {
+          alert('No data found for the selected referals in the date range');
+          setLoading(false);
+          return;
+        }
+      }
+      
+      // Filter by selected advance booking if selective referals is chosen
+      if (viewOption === 'Advance Booking' && advanceBookingSelect === 'selectiveReferals' && selectedAdvanceBooking.length > 0) {
+        apiData = apiData.filter(visit => selectedAdvanceBooking.includes(visit.Referalid));
+        
+        if (apiData.length === 0) {
+          alert('No data found for the selected advance booking referals in the date range');
+          setLoading(false);
+          return;
+        }
+      }
+      
       let selectionOption;
       if (viewOption === 'DoctorWise') {
         selectionOption = doctorSelect === 'selectiveDoctors' ? 'selectiveDoctors' : 'allDoctors';
       } else if (viewOption === 'Visit Type') {
         selectionOption = visitTypeSelect === 'selectiveVisitTypes' ? 'selectiveVisitTypes' : 'allVisitTypes';
+      } else if (viewOption === 'RefDoctorWise') {
+        selectionOption = refDoctorSelect === 'selectiveDoctors' ? 'selectiveDoctors' : 'allDoctors';
+      } else if (viewOption === 'Ref wise') {
+        selectionOption = refWiseSelect === 'selectiveReferals' ? 'selectiveReferals' : 'allReferals';
+      } else if (viewOption === 'Advance Booking') {
+        selectionOption = advanceBookingSelect === 'selectiveReferals' ? 'selectiveReferals' : 'allReferals';
       } else {
         selectionOption = 'allDoctors';
       }
@@ -550,6 +673,330 @@ const DrRectVisitDetail = () => {
                           </div>
                         ))}
                       </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* RefDoctorWise Selection - Only show for RefDoctorWise */}
+            {viewOption === 'RefDoctorWise' && (
+              <div className="mb-4 border rounded-3 p-3 bg-light shadow-sm">
+                <h6 className="fw-bold mb-3 text-dark">Doctor Selection</h6>
+                <div className="mb-3">
+                  <div className="form-check form-check-inline me-4">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      name="refDoctorSelect" 
+                      id="allRefDoctors" 
+                      checked={refDoctorSelect === 'allDoctors'}
+                      onChange={() => setRefDoctorSelect('allDoctors')}
+                    />
+                    <label className="form-check-label" htmlFor="allRefDoctors">All Doctors</label>
+                  </div>
+                  <div className="form-check form-check-inline">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      name="refDoctorSelect" 
+                      id="selectiveRefDoctors" 
+                      checked={refDoctorSelect === 'selectiveDoctors'}
+                      onChange={() => setRefDoctorSelect('selectiveDoctors')}
+                    />
+                    <label className="form-check-label" htmlFor="selectiveRefDoctors">Selective Doctors</label>
+                  </div>
+                </div>
+
+                {refDoctorSelect === 'selectiveDoctors' && (
+                  <div>
+                    <div className="mb-3">
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="Search doctor by name..."
+                        value={refDoctorSearchTerm}
+                        onChange={(e) => setRefDoctorSearchTerm(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="row mt-2 g-2 overflow-auto border p-2 rounded" style={{ maxHeight: '180px' }}>
+                      {filteredRefDoctors.slice((refDoctorCurrentPage - 1) * doctorsPerPage, refDoctorCurrentPage * doctorsPerPage).map((doctor, i) => (
+                        <div className="col-md-6 col-lg-4" key={i}>
+                          <div className="form-check">
+                            <input 
+                              className="form-check-input" 
+                              type="checkbox" 
+                              id={`refDoctor-${i}`}
+                              checked={selectedRefDoctors.includes(doctor.Doctor)}
+                              onChange={() => handleRefDoctorCheckboxChange(doctor.Doctor)}
+                            />
+                            <label className="form-check-label" htmlFor={`refDoctor-${i}`}>
+                              {doctor.Doctor}
+                            </label>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {filteredRefDoctors.length > doctorsPerPage && (
+                      <nav className="mt-3">
+                        <ul className="pagination pagination-sm justify-content-center">
+                          <li className={`page-item ${refDoctorCurrentPage === 1 ? 'disabled' : ''}`}>
+                            <button 
+                              className="page-link" 
+                              onClick={() => setRefDoctorCurrentPage(prev => Math.max(prev - 1, 1))}
+                              disabled={refDoctorCurrentPage === 1}
+                            >
+                              ← Prev
+                            </button>
+                          </li>
+                          {(() => {
+                            const totalPages = Math.ceil(filteredRefDoctors.length / doctorsPerPage);
+                            const maxVisible = 5;
+                            let startPage = Math.max(1, refDoctorCurrentPage - 2);
+                            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                            
+                            const pages = [];
+                            for (let i = startPage; i <= endPage; i++) {
+                              pages.push(
+                                <li key={i} className={`page-item ${refDoctorCurrentPage === i ? 'active' : ''}`}>
+                                  <button className="page-link" onClick={() => setRefDoctorCurrentPage(i)}>{i}</button>
+                                </li>
+                              );
+                            }
+                            return pages;
+                          })()}
+                          <li className={`page-item ${refDoctorCurrentPage === Math.ceil(filteredRefDoctors.length / doctorsPerPage) ? 'disabled' : ''}`}>
+                            <button 
+                              className="page-link" 
+                              onClick={() => setRefDoctorCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredRefDoctors.length / doctorsPerPage)))}
+                              disabled={refDoctorCurrentPage === Math.ceil(filteredRefDoctors.length / doctorsPerPage)}
+                            >
+                              Next →
+                            </button>
+                          </li>
+                        </ul>
+                        <div className="text-center mt-2 text-muted small">
+                          Showing {Math.min((refDoctorCurrentPage - 1) * doctorsPerPage + 1, filteredRefDoctors.length)} to {Math.min(refDoctorCurrentPage * doctorsPerPage, filteredRefDoctors.length)} of {filteredRefDoctors.length} doctors
+                        </div>
+                      </nav>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Ref wise Selection - Only show for Ref wise */}
+            {viewOption === 'Ref wise' && (
+              <div className="mb-4 border rounded-3 p-3 bg-light shadow-sm">
+                <h6 className="fw-bold mb-3 text-dark">Referal Selection</h6>
+                <div className="mb-3">
+                  <div className="form-check form-check-inline me-4">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      name="refWiseSelect" 
+                      id="allRefWise" 
+                      checked={refWiseSelect === 'allReferals'}
+                      onChange={() => setRefWiseSelect('allReferals')}
+                    />
+                    <label className="form-check-label" htmlFor="allRefWise">All Referals</label>
+                  </div>
+                  <div className="form-check form-check-inline">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      name="refWiseSelect" 
+                      id="selectiveRefWise" 
+                      checked={refWiseSelect === 'selectiveReferals'}
+                      onChange={() => setRefWiseSelect('selectiveReferals')}
+                    />
+                    <label className="form-check-label" htmlFor="selectiveRefWise">Selective Referals</label>
+                  </div>
+                </div>
+
+                {refWiseSelect === 'selectiveReferals' && (
+                  <div>
+                    <div className="mb-3">
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="Search referal by name..."
+                        value={refWiseSearchTerm}
+                        onChange={(e) => setRefWiseSearchTerm(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="row mt-2 g-2 overflow-auto border p-2 rounded" style={{ maxHeight: '180px' }}>
+                      {filteredRefWise.slice((refWiseCurrentPage - 1) * doctorsPerPage, refWiseCurrentPage * doctorsPerPage).map((referal, i) => (
+                        <div className="col-md-6 col-lg-4" key={i}>
+                          <div className="form-check">
+                            <input 
+                              className="form-check-input" 
+                              type="checkbox" 
+                              id={`refWise-${i}`}
+                              checked={selectedRefWise.includes(referal.ReferalId)}
+                              onChange={() => handleRefWiseCheckboxChange(referal.ReferalId)}
+                            />
+                            <label className="form-check-label" htmlFor={`refWise-${i}`}>
+                              {referal.Referal}
+                            </label>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {filteredRefWise.length > doctorsPerPage && (
+                      <nav className="mt-3">
+                        <ul className="pagination pagination-sm justify-content-center">
+                          <li className={`page-item ${refWiseCurrentPage === 1 ? 'disabled' : ''}`}>
+                            <button 
+                              className="page-link" 
+                              onClick={() => setRefWiseCurrentPage(prev => Math.max(prev - 1, 1))}
+                              disabled={refWiseCurrentPage === 1}
+                            >
+                              ← Prev
+                            </button>
+                          </li>
+                          {(() => {
+                            const totalPages = Math.ceil(filteredRefWise.length / doctorsPerPage);
+                            const maxVisible = 5;
+                            let startPage = Math.max(1, refWiseCurrentPage - 2);
+                            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                            
+                            const pages = [];
+                            for (let i = startPage; i <= endPage; i++) {
+                              pages.push(
+                                <li key={i} className={`page-item ${refWiseCurrentPage === i ? 'active' : ''}`}>
+                                  <button className="page-link" onClick={() => setRefWiseCurrentPage(i)}>{i}</button>
+                                </li>
+                              );
+                            }
+                            return pages;
+                          })()}
+                          <li className={`page-item ${refWiseCurrentPage === Math.ceil(filteredRefWise.length / doctorsPerPage) ? 'disabled' : ''}`}>
+                            <button 
+                              className="page-link" 
+                              onClick={() => setRefWiseCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredRefWise.length / doctorsPerPage)))}
+                              disabled={refWiseCurrentPage === Math.ceil(filteredRefWise.length / doctorsPerPage)}
+                            >
+                              Next →
+                            </button>
+                          </li>
+                        </ul>
+                        <div className="text-center mt-2 text-muted small">
+                          Showing {Math.min((refWiseCurrentPage - 1) * doctorsPerPage + 1, filteredRefWise.length)} to {Math.min(refWiseCurrentPage * doctorsPerPage, filteredRefWise.length)} of {filteredRefWise.length} referals
+                        </div>
+                      </nav>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Advance Booking Selection - Only show for Advance Booking */}
+            {viewOption === 'Advance Booking' && (
+              <div className="mb-4 border rounded-3 p-3 bg-light shadow-sm">
+                <h6 className="fw-bold mb-3 text-dark">Referal Selection</h6>
+                <div className="mb-3">
+                  <div className="form-check form-check-inline me-4">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      name="advanceBookingSelect" 
+                      id="allAdvanceBooking" 
+                      checked={advanceBookingSelect === 'allReferals'}
+                      onChange={() => setAdvanceBookingSelect('allReferals')}
+                    />
+                    <label className="form-check-label" htmlFor="allAdvanceBooking">All Referals</label>
+                  </div>
+                  <div className="form-check form-check-inline">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      name="advanceBookingSelect" 
+                      id="selectiveAdvanceBooking" 
+                      checked={advanceBookingSelect === 'selectiveReferals'}
+                      onChange={() => setAdvanceBookingSelect('selectiveReferals')}
+                    />
+                    <label className="form-check-label" htmlFor="selectiveAdvanceBooking">Selective Referals</label>
+                  </div>
+                </div>
+
+                {advanceBookingSelect === 'selectiveReferals' && (
+                  <div>
+                    <div className="mb-3">
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="Search referal by name..."
+                        value={advanceBookingSearchTerm}
+                        onChange={(e) => setAdvanceBookingSearchTerm(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="row mt-2 g-2 overflow-auto border p-2 rounded" style={{ maxHeight: '180px' }}>
+                      {filteredAdvanceBooking.slice((advanceBookingCurrentPage - 1) * doctorsPerPage, advanceBookingCurrentPage * doctorsPerPage).map((referal, i) => (
+                        <div className="col-md-6 col-lg-4" key={i}>
+                          <div className="form-check">
+                            <input 
+                              className="form-check-input" 
+                              type="checkbox" 
+                              id={`advanceBooking-${i}`}
+                              checked={selectedAdvanceBooking.includes(referal.ReferalId)}
+                              onChange={() => handleAdvanceBookingCheckboxChange(referal.ReferalId)}
+                            />
+                            <label className="form-check-label" htmlFor={`advanceBooking-${i}`}>
+                              {referal.Referal}
+                            </label>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {filteredAdvanceBooking.length > doctorsPerPage && (
+                      <nav className="mt-3">
+                        <ul className="pagination pagination-sm justify-content-center">
+                          <li className={`page-item ${advanceBookingCurrentPage === 1 ? 'disabled' : ''}`}>
+                            <button 
+                              className="page-link" 
+                              onClick={() => setAdvanceBookingCurrentPage(prev => Math.max(prev - 1, 1))}
+                              disabled={advanceBookingCurrentPage === 1}
+                            >
+                              ← Prev
+                            </button>
+                          </li>
+                          {(() => {
+                            const totalPages = Math.ceil(filteredAdvanceBooking.length / doctorsPerPage);
+                            const maxVisible = 5;
+                            let startPage = Math.max(1, advanceBookingCurrentPage - 2);
+                            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                            
+                            const pages = [];
+                            for (let i = startPage; i <= endPage; i++) {
+                              pages.push(
+                                <li key={i} className={`page-item ${advanceBookingCurrentPage === i ? 'active' : ''}`}>
+                                  <button className="page-link" onClick={() => setAdvanceBookingCurrentPage(i)}>{i}</button>
+                                </li>
+                              );
+                            }
+                            return pages;
+                          })()}
+                          <li className={`page-item ${advanceBookingCurrentPage === Math.ceil(filteredAdvanceBooking.length / doctorsPerPage) ? 'disabled' : ''}`}>
+                            <button 
+                              className="page-link" 
+                              onClick={() => setAdvanceBookingCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredAdvanceBooking.length / doctorsPerPage)))}
+                              disabled={advanceBookingCurrentPage === Math.ceil(filteredAdvanceBooking.length / doctorsPerPage)}
+                            >
+                              Next →
+                            </button>
+                          </li>
+                        </ul>
+                        <div className="text-center mt-2 text-muted small">
+                          Showing {Math.min((advanceBookingCurrentPage - 1) * doctorsPerPage + 1, filteredAdvanceBooking.length)} to {Math.min(advanceBookingCurrentPage * doctorsPerPage, filteredAdvanceBooking.length)} of {filteredAdvanceBooking.length} referals
+                        </div>
+                      </nav>
                     )}
                   </div>
                 )}
